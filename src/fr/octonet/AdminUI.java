@@ -8,6 +8,7 @@ import java.util.HashMap;
 class ClientWindow extends JFrame {
     private String clientName;
     private JTextArea messageArea;
+    private JTextField destField;      // Nouveau champ pour le destinataire
     private JTextField messageField;
     private Admin admin;
 
@@ -16,7 +17,7 @@ class ClientWindow extends JFrame {
         this.clientName = clientName;
         this.admin = admin;
 
-        setSize(400, 300);
+        setSize(400, 350);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -29,21 +30,35 @@ class ClientWindow extends JFrame {
 
         // Panel pour envoyer des messages
         JPanel inputPanel = new JPanel(new BorderLayout());
+
+        // Champ pour le destinataire
+        JPanel destPanel = new JPanel(new BorderLayout());
+        destPanel.add(new JLabel("Destinataire : "), BorderLayout.WEST);
+        destField = new JTextField();
+        destPanel.add(destField, BorderLayout.CENTER);
+
+        inputPanel.add(destPanel, BorderLayout.NORTH);
+
+        // Champ pour le message
         messageField = new JTextField();
         JButton sendButton = new JButton("Envoyer");
 
-        inputPanel.add(messageField, BorderLayout.CENTER);
-        inputPanel.add(sendButton, BorderLayout.EAST);
+        JPanel msgPanel = new JPanel(new BorderLayout());
+        msgPanel.add(messageField, BorderLayout.CENTER);
+        msgPanel.add(sendButton, BorderLayout.EAST);
+
+        inputPanel.add(msgPanel, BorderLayout.SOUTH);
 
         mainPanel.add(inputPanel, BorderLayout.SOUTH);
 
         // Action pour envoyer un message
         sendButton.addActionListener(e -> {
+            String dest = destField.getText();
             String message = messageField.getText();
-            if (!message.isEmpty()) {
-                // Envoi du message à travers l'admin, en précisant la source et la destination
-                admin.sendMessageFromClientToClient(clientName, clientName, message);
-                messageArea.append("Vous: " + message + "\n");
+            if (!dest.isEmpty() && !message.isEmpty()) {
+                // Utilise la table de routage pour router le message
+                admin.sendMessageFromClientToClient(clientName, dest, message);
+                messageArea.append("Vous à " + dest + " : " + message + "\n");
                 messageField.setText("");
             }
         });

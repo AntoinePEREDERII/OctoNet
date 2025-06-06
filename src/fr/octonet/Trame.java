@@ -1,42 +1,44 @@
 package fr.octonet;
 
-import java.util.Arrays;
+import java.io.Serializable;
+import java.util.Map;
 
-public class Trame {
-    private String adresseDest;
-    private String adresseSource;
-    private byte synAckDataError;
-    private byte[] dataUser;
-    private byte bitDeParite;
+public class Trame implements Serializable {
+    private String type; // "CLIENT", "SERVER", "ROUTING_TABLE", etc.
+    private String serverIpDest; // IP:port du serveur destinataire
+    private String clientNameSrc; // nom du client source (si concerné)
+    private String clientNameDest; // nom du client destinataire (si concerné)
+    private Object data; // message, ou autre
+    private Map<String, String> routingTable; // pour l'échange de tables de routage
 
-    public Trame(String adresseDest, String adresseSource, byte synAckDataError, byte[] dataUser, byte bitDeParite) {
-        this.adresseDest = adresseDest;
-        this.adresseSource = adresseSource;
-        this.synAckDataError = synAckDataError;
-        this.dataUser = dataUser;
-        this.bitDeParite = bitDeParite;
-    }
+    // Getters et setters
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    // Getters et Setters
-    public String getAdresseDest() { return adresseDest; }
-    public void setAdresseDest(String adresseDest) { this.adresseDest = adresseDest; }
-    public String getAdresseSource() { return adresseSource; }
-    public void setAdresseSource(String adresseSource) { this.adresseSource = adresseSource; }
-    public byte getSynAckDataError() { return synAckDataError; }
-    public void setSynAckDataError(byte synAckDataError) { this.synAckDataError = synAckDataError; }
-    public byte[] getDataUser() { return dataUser; }
-    public void setDataUser(byte[] dataUser) { this.dataUser = dataUser; }
-    public byte getBitDeParite() { return bitDeParite; }
-    public void setBitDeParite(byte bitDeParite) { this.bitDeParite = bitDeParite; }
+    public String getServerIpDest() { return serverIpDest; }
+    public void setServerIpDest(String serverIpDest) { this.serverIpDest = serverIpDest; }
+
+    public String getClientNameSrc() { return clientNameSrc; }
+    public void setClientNameSrc(String clientNameSrc) { this.clientNameSrc = clientNameSrc; }
+
+    public String getClientNameDest() { return clientNameDest; }
+    public void setClientNameDest(String clientNameDest) { this.clientNameDest = clientNameDest; }
+
+    public Object getData() { return data; }
+    public void setData(Object data) { this.data = data; }
+
+    public Map<String, String> getRoutingTable() { return routingTable; }
+    public void setRoutingTable(Map<String, String> routingTable) { this.routingTable = routingTable; }
 
     @Override
     public String toString() {
         return "Trame{" +
-                "adresseDest='" + adresseDest + '\'' +
-                ", adresseSource='" + adresseSource + '\'' +
-                ", synAckDataError=" + synAckDataError +
-                ", dataUser=" + Arrays.toString(dataUser) +
-                ", bitDeParite=" + bitDeParite +
+                "type='" + type + '\'' +
+                ", serverIpDest='" + serverIpDest + '\'' +
+                ", clientNameSrc='" + clientNameSrc + '\'' +
+                ", clientNameDest='" + clientNameDest + '\'' +
+                ", data=" + data +
+                ", routingTable=" + routingTable +
                 '}';
     }
 }

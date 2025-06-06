@@ -93,6 +93,7 @@ public class AdminUI extends JFrame {
     private Admin admin;
     public static Map<String, ClientWindow> clientWindows;
     private JLabel serverInfoLabel;
+    private JTextArea logArea; // Ajoute ce champ
 
     public AdminUI(Admin admin) {
         super("Admin Interface");
@@ -153,6 +154,13 @@ public class AdminUI extends JFrame {
         JScrollPane routingScrollPane = new JScrollPane(routingTableArea);
         routingScrollPane.setPreferredSize(new Dimension(220, 0));
         mainPanel.add(routingScrollPane, BorderLayout.EAST);
+
+        // Zone de logs
+        logArea = new JTextArea(10, 40);
+        logArea.setEditable(false);
+        JScrollPane logScrollPane = new JScrollPane(logArea);
+        logScrollPane.setPreferredSize(new Dimension(400, 120));
+        mainPanel.add(logScrollPane, BorderLayout.SOUTH);
 
         // Action pour ajouter un serveur distant
         addServerButton.addActionListener(e -> {
@@ -218,6 +226,11 @@ public class AdminUI extends JFrame {
         if (window != null) {
             window.addMessage(message);
         }
+    }
+
+    // Méthode utilitaire pour ajouter un log
+    public void addLog(String log) {
+        logArea.append(log + "\n");
     }
 
     public static void main(String[] args) {

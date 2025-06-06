@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch AdminUI",
+            "request": "launch",
+            "mainClass": "fr.octonet.AdminUI",
+            "projectName": "OctoNet",
+            "vmArgs": "-cp bin fr.octonet.AdminUI"
+        }
+    ]
+} 

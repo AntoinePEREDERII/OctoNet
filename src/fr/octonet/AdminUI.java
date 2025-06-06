@@ -3,6 +3,57 @@ package fr.octonet;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
+import java.util.HashMap;
+
+class ClientWindow extends JFrame {
+    private String clientName;
+    private JTextArea messageArea;
+    private JTextField messageField;
+    private Admin admin;
+
+    public ClientWindow(String clientName, Admin admin) {
+        super("Client: " + clientName);
+        this.clientName = clientName;
+        this.admin = admin;
+
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        // Zone de messages
+        messageArea = new JTextArea();
+        messageArea.setEditable(false);
+        mainPanel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
+
+        // Panel pour envoyer des messages
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        messageField = new JTextField();
+        JButton sendButton = new JButton("Envoyer");
+        
+        inputPanel.add(messageField, BorderLayout.CENTER);
+        inputPanel.add(sendButton, BorderLayout.EAST);
+
+        mainPanel.add(inputPanel, BorderLayout.SOUTH);
+
+        // Action pour envoyer un message
+        sendButton.addActionListener(e -> {
+            String message = messageField.getText();
+            if (!message.isEmpty()) {
+                admin.sendMessageToClient(clientName, message);
+                messageArea.append("Vous: " + message + "\n");
+                messageField.setText("");
+            }
+        });
+
+        add(mainPanel);
+    }
+
+    public void addMessage(String message) {
+        messageArea.append(message + "\n");
+    }
+}
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
@@ -12,11 +63,13 @@ public class AdminUI extends JFrame {
     private JTextField clientDestField;
     private JTextField messageField;
     private Admin admin;
+    private Map<String, ClientWindow> clientWindows;
 
     public AdminUI(Admin admin) {
+        super("Admin Interface");
         this.admin = admin;
+        this.clientWindows = new HashMap<>();
 
-        setTitle("Admin Interface");
         setSize(600, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -26,6 +79,14 @@ public class AdminUI extends JFrame {
         // Panel pour les clients
         clientListModel = new DefaultListModel<>();
         clientJList = new JList<>(clientListModel);
+        clientJList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String selectedClient = clientJList.getSelectedValue();
+                if (selectedClient != null) {
+                    showClientWindow(selectedClient);
+                }
+            }
+        });
         mainPanel.add(new JScrollPane(clientJList), BorderLayout.WEST);
 
         // Panel pour les serveurs distants et les messages
@@ -78,7 +139,9 @@ public class AdminUI extends JFrame {
         // Action pour ajouter un client
         addClientButton.addActionListener(e -> {
             Client client = admin.newClient();
-            clientListModel.addElement(client.getName());
+            String clientName = client.getName();
+            clientListModel.addElement(clientName);
+            showClientWindow(clientName);
             updateRoutingTable(routingTableArea);
         });
 
@@ -101,6 +164,15 @@ public class AdminUI extends JFrame {
         add(mainPanel);
     }
 
+    private void showClientWindow(String clientName) {
+        ClientWindow window = clientWindows.get(clientName);
+        if (window == null) {
+            window = new ClientWindow(clientName, admin);
+            clientWindows.put(clientName, window);
+        }
+        window.setVisible(true);
+    }
+
     // Méthode pour afficher la table de routage
     private void updateRoutingTable(JTextArea area) {
         StringBuilder sb = new StringBuilder();
@@ -112,10 +184,25 @@ public class AdminUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Admin admin = new Admin();
-            admin.startSrv();
-            AdminUI adminUI = new AdminUI(admin);
-            adminUI.setVisible(true);
+            try {
+                // Attendre un peu pour s'assurer que les ports sont libérés
+                Thread.sleep(1000);
+                
+                Admin admin = new Admin();
+                admin.startSrv();
+                
+                // Attendre que le serveur démarre
+                Thread.sleep(500);
+                
+                AdminUI adminUI = new AdminUI(admin);
+                adminUI.setVisible(true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                    "Erreur au démarrage : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         });
     }
 }

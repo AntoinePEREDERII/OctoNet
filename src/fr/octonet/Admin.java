@@ -4,11 +4,12 @@ import java.util.*;
 
 public class Admin {
     private int nbClient = 0;
-    private int portListenCl = 9080;
-    private int portListenSrv = 9081;
-    private int portClient = 9082;
+    private int portListenCl = 9090;
+    private int portListenSrv = 9091;
+    private int portClient = 9092;
+    private String localIP = "127.0.0.1"; // Adresse IP locale
 
-    private final List<Client> clients = new ArrayList<>();
+    private final Map<String, Client> clients = new HashMap<>();
     private final List<String> remoteServers = new ArrayList<>();
     private final Map<String, String> routingTable = new HashMap<>(); // clé: nom, valeur: next hop
 
@@ -16,8 +17,8 @@ public class Admin {
 
     public Client newClient() {
         int newPort = portClient + nbClient;
-        Client client = new Client("localhost", newPort);
-        clients.add(client);
+        Client client = new Client("localhost", portListenCl); // Les clients se connectent au port d'écoute client
+        clients.put(client.getName(), client);
         nbClient++;
         routingTable.put(client.getName(), "local"); // Routage local
         return client;
@@ -32,15 +33,20 @@ public class Admin {
     }
 
     public List<Client> getClients() {
-        return clients;
+        return new ArrayList<>(clients.values());
     }
 
     public void sendMessageToClient(String clientName, String message) {
-        for (Client c : clients) {
-            if (c.getName().equals(clientName)) {
-                c.sendMessage(message);
-                break;
+        Client client = clients.get(clientName);
+        if (client != null) {
+            try {
+                client.sendMessage(message);
+                System.out.println("Message envoyé à " + clientName + ": " + message);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'envoi du message à " + clientName + ": " + e.getMessage());
             }
+        } else {
+            System.err.println("Client " + clientName + " non trouvé");
         }
     }
 
@@ -48,6 +54,13 @@ public class Admin {
         serveur = new Serveur(portListenCl, portListenSrv, this);
         new Thread(serveur::listenCl).start();
         new Thread(serveur::listenSrv).start();
+        
+        // Attendre que le serveur démarre
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public Map<String, String> getRoutingTable() {
@@ -66,6 +79,7 @@ public class Admin {
             System.out.println("Destination inconnue dans la table de routage.");
             return;
         }
+        
         if (nextHop.equals("local")) {
             sendMessageToClient(clientDest, message);
         } else {
@@ -74,6 +88,40 @@ public class Admin {
                 trame.setServerIpDest(nextHop);
                 serveur.sendTrameToServer(trame, nextHop);
             }
+        }
+    }
+
+    public void newClient(String name) {
+        try {
+            // Attendre que le serveur soit prêt
+            Thread.sleep(1000);
+            
+            // Créer un nouveau client
+            Client client = new Client(localIP, portListenCl);
+            clients.put(name, client);
+            
+            // Pas besoin de thread ou de start, le client est prêt à envoyer des messages
+            System.out.println("Nouveau client créé : " + name);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la création du client " + name + ": " + e.getMessage());
+        }
+    }
+
+    public void sendMessageToClient(String source, String destination, String message) {
+        try {
+            Client sourceClient = clients.get(source);
+            Client destClient = clients.get(destination);
+            
+            if (sourceClient == null || destClient == null) {
+                System.err.println("Client source ou destination non trouvé");
+                return;
+            }
+            
+            // Envoyer le message
+            sourceClient.sendMessage(message);
+            System.out.println("Message envoyé de " + source + " à " + destination);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi du message: " + e.getMessage());
         }
     }
 }

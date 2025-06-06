@@ -11,6 +11,15 @@ public class Trame implements Serializable {
     private Object data; // message, ou autre
     private Map<String, String> routingTable; // pour l'échange de tables de routage
 
+    public Trame() {
+        this.type = "DEFAULT";
+    }
+
+    public Trame(String message) {
+        this.type = "CLIENT";
+        this.data = message;
+    }
+
     // Getters et setters
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

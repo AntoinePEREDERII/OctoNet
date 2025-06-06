@@ -14,6 +14,7 @@ public class Admin {
     private final Map<String, String> routingTable = new HashMap<>(); // clé: nom, valeur: next hop
 
     private Serveur serveur;
+    private AdminUI adminUI;
 
     public Client newClient() {
         int newPort = portClient + nbClient;
@@ -40,8 +41,13 @@ public class Admin {
         Client client = clients.get(clientName);
         if (client != null) {
             try {
-                client.sendMessage(message);
+                client.sendMessage(clientName, message);  // Le client envoie à lui-même
                 System.out.println("Message envoyé à " + clientName + ": " + message);
+                
+                // Afficher le message dans la fenêtre du client
+                if (adminUI != null) {
+                    adminUI.addMessageToClientWindow(clientName, message);
+                }
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'envoi du message à " + clientName + ": " + e.getMessage());
             }
@@ -68,26 +74,16 @@ public class Admin {
     }
 
     public void sendMessageFromClientToClient(String clientSrc, String clientDest, String message) {
-        Trame trame = new Trame();
-        trame.setType("CLIENT");
-        trame.setClientNameSrc(clientSrc);
-        trame.setClientNameDest(clientDest);
-        trame.setData(message);
-
-        String nextHop = routingTable.get(clientDest);
-        if (nextHop == null) {
-            System.out.println("Destination inconnue dans la table de routage.");
-            return;
-        }
-        
-        if (nextHop.equals("local")) {
-            sendMessageToClient(clientDest, message);
-        } else {
-            // Envoi via le serveur distant
-            if (serveur != null) {
-                trame.setServerIpDest(nextHop);
-                serveur.sendTrameToServer(trame, nextHop);
+        Client sourceClient = clients.get(clientSrc);
+        if (sourceClient != null) {
+            try {
+                sourceClient.sendMessage(clientDest, message);
+                System.out.println("Message envoyé de " + clientSrc + " à " + clientDest + ": " + message);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'envoi du message: " + e.getMessage());
             }
+        } else {
+            System.err.println("Client source " + clientSrc + " non trouvé");
         }
     }
 
@@ -118,10 +114,14 @@ public class Admin {
             }
             
             // Envoyer le message
-            sourceClient.sendMessage(message);
+            sourceClient.sendMessage(source, message);
             System.out.println("Message envoyé de " + source + " à " + destination);
         } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi du message: " + e.getMessage());
         }
+    }
+
+    public void setAdminUI(AdminUI ui) {
+        this.adminUI = ui;
     }
 }

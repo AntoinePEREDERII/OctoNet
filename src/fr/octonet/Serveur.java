@@ -66,9 +66,14 @@ public class Serveur {
                 
                 // Traiter la trame
                 if (trame.getType().equals("CLIENT")) {
+                    String sourceClient = trame.getClientNameSrc();
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
-                    admin.sendMessageToClient(destClient, message);
+                    
+                    if (destClient != null && !destClient.equals(sourceClient)) {
+                        // Envoyer uniquement si le destinataire est différent de l'expéditeur
+                        admin.sendMessageToClient(destClient, message);
+                    }
                 }
             }
         } catch (IOException | ClassNotFoundException e) {

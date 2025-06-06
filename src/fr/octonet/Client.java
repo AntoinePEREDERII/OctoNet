@@ -18,9 +18,16 @@ public class Client {
         return name;
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(String destClient, String message) {
         Trame trame = new Trame(message);
+        trame.setClientNameSrc(this.name);
+        trame.setClientNameDest(destClient);
         sendTrame(trame);
+    }
+
+    public void sendMessage(String message) {
+        // Pour la compatibilité avec l'ancien code
+        sendMessage(null, message);
     }
 
     public void sendTrame(Trame trame) {

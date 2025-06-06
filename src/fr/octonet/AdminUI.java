@@ -182,6 +182,13 @@ public class AdminUI extends JFrame {
         area.setText(sb.toString());
     }
 
+    public void addMessageToClientWindow(String clientName, String message) {
+        ClientWindow window = clientWindows.get(clientName);
+        if (window != null) {
+            window.addMessage(message);
+        }
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -189,12 +196,13 @@ public class AdminUI extends JFrame {
                 Thread.sleep(1000);
                 
                 Admin admin = new Admin();
+                AdminUI adminUI = new AdminUI(admin);
+                admin.setAdminUI(adminUI);  // Lier l'UI à l'Admin
                 admin.startSrv();
                 
                 // Attendre que le serveur démarre
                 Thread.sleep(500);
                 
-                AdminUI adminUI = new AdminUI(admin);
                 adminUI.setVisible(true);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null,

@@ -72,7 +72,7 @@ public class AdminUI extends JFrame {
         this.admin = admin;
         clientWindows = new HashMap<>();
 
-        setSize(600, 450);
+        setSize(900, 600); // Taille augmentée
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -85,18 +85,12 @@ public class AdminUI extends JFrame {
         // Panel pour les clients
         clientListModel = new DefaultListModel<>();
         clientJList = new JList<>(clientListModel);
-        clientJList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                String selectedClient = clientJList.getSelectedValue();
-                if (selectedClient != null) {
-                    showClientWindow(selectedClient);
-                }
-            }
-        });
-        mainPanel.add(new JScrollPane(clientJList), BorderLayout.WEST);
+        JScrollPane clientScrollPane = new JScrollPane(clientJList);
+        clientScrollPane.setPreferredSize(new Dimension(180, 0));
+        mainPanel.add(clientScrollPane, BorderLayout.WEST);
 
         // Panel pour les serveurs distants et les messages
-        JPanel controlPanel = new JPanel(new GridLayout(11, 1));
+        JPanel controlPanel = new JPanel(new GridLayout(12, 1, 5, 5)); // 12 lignes pour tout afficher
 
         serverAddressField = new JTextField();
         controlPanel.add(new JLabel("Adresse du Serveur distant (ip:port):"));
@@ -108,12 +102,10 @@ public class AdminUI extends JFrame {
         JButton addClientButton = new JButton("Ajouter Client");
         controlPanel.add(addClientButton);
 
-        // Nouveau : champ pour le client source
         controlPanel.add(new JLabel("Nom du client source :"));
         clientSrcField = new JTextField();
         controlPanel.add(clientSrcField);
 
-        // Nouveau : champ pour le client destinataire
         controlPanel.add(new JLabel("Nom du client destinataire :"));
         clientDestField = new JTextField();
         controlPanel.add(clientDestField);
@@ -125,12 +117,15 @@ public class AdminUI extends JFrame {
         JButton sendMessageButton = new JButton("Envoyer Message");
         controlPanel.add(sendMessageButton);
 
-        mainPanel.add(controlPanel, BorderLayout.CENTER);
+        JScrollPane controlScrollPane = new JScrollPane(controlPanel);
+        mainPanel.add(controlScrollPane, BorderLayout.CENTER);
 
         // Ajout d'un panneau pour la table de routage
         JTextArea routingTableArea = new JTextArea(10, 20);
         routingTableArea.setEditable(false);
-        mainPanel.add(new JScrollPane(routingTableArea), BorderLayout.EAST);
+        JScrollPane routingScrollPane = new JScrollPane(routingTableArea);
+        routingScrollPane.setPreferredSize(new Dimension(220, 0));
+        mainPanel.add(routingScrollPane, BorderLayout.EAST);
 
         // Action pour ajouter un serveur distant
         addServerButton.addActionListener(e -> {

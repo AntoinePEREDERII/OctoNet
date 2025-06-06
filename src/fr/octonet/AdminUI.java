@@ -44,6 +44,9 @@ class ClientWindow extends JFrame {
         messageField = new JTextField();
         JButton sendButton = new JButton("Envoyer");
 
+        // Ajout de l'action pour envoyer le message en appuyant sur Entrée
+        messageField.addActionListener(e -> sendButton.doClick());
+
         JPanel msgPanel = new JPanel(new BorderLayout());
         msgPanel.add(messageField, BorderLayout.CENTER);
         msgPanel.add(sendButton, BorderLayout.EAST);

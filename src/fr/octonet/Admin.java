@@ -60,6 +60,25 @@ public class Admin {
         }
     }
 
+    public void sendMessageToClient(String clientName, String message, String senderName) {
+        Client client = clients.get(clientName);
+        if (client != null) {
+            try {
+                client.sendMessage(clientName, message);  // Le client envoie à lui-même
+                System.out.println("Message envoyé à " + clientName + ": " + message);
+
+                // Afficher le message dans la fenêtre du client destinataire (si UI)
+                if (AdminUI.clientWindows != null && AdminUI.clientWindows.containsKey(clientName)) {
+                    AdminUI.clientWindows.get(clientName).addMessage("De " + senderName + " : " + message);
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'envoi du message à " + clientName + ": " + e.getMessage());
+            }
+        } else {
+            System.err.println("Client " + clientName + " non trouvé");
+        }
+    }
+
     public void startSrv() {
         serveur = new Serveur(portListenCl, portListenSrv, this);
         new Thread(serveur::listenCl).start();
@@ -84,7 +103,7 @@ public class Admin {
             return;
         }
         if (nextHop.equals("local")) {
-            sendMessageToClient(clientDest, message);
+            sendMessageToClient(clientDest, message, clientSrc); // <-- ici
         } else {
             // Envoi via le serveur distant
             if (serveur != null) {

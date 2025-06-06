@@ -96,7 +96,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(new JScrollPane(clientJList), BorderLayout.WEST);
 
         // Panel pour les serveurs distants et les messages
-        JPanel controlPanel = new JPanel(new GridLayout(10, 1));
+        JPanel controlPanel = new JPanel(new GridLayout(11, 1));
 
         serverAddressField = new JTextField();
         controlPanel.add(new JLabel("Adresse du Serveur distant (ip:port):"));
@@ -108,10 +108,12 @@ public class AdminUI extends JFrame {
         JButton addClientButton = new JButton("Ajouter Client");
         controlPanel.add(addClientButton);
 
+        // Nouveau : champ pour le client source
         controlPanel.add(new JLabel("Nom du client source :"));
         clientSrcField = new JTextField();
         controlPanel.add(clientSrcField);
 
+        // Nouveau : champ pour le client destinataire
         controlPanel.add(new JLabel("Nom du client destinataire :"));
         clientDestField = new JTextField();
         controlPanel.add(clientDestField);
@@ -157,6 +159,7 @@ public class AdminUI extends JFrame {
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
             if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
+                // Utilise la table de routage pour router le message
                 admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
                 JOptionPane.showMessageDialog(AdminUI.this,
                         "Message envoyé de " + clientSrc + " à " + clientDest + ": " + message);

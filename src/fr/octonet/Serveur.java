@@ -64,13 +64,14 @@ public class Serveur {
             while (true) {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du client: " + trame);
-                
+                if (admin.adminUI != null) admin.adminUI.addLog("Trame reçue du client: " + trame);
+
                 // Traiter la trame
                 if (trame.getType().equals("CLIENT")) {
                     String sourceClient = trame.getClientNameSrc();
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
-                    
+
                     if (destClient != null && !destClient.equals(sourceClient)) {
                         // Envoyer uniquement si le destinataire est différent de l'expéditeur
                         admin.sendMessageToClient(destClient, message);
@@ -88,6 +89,7 @@ public class Serveur {
             while (true) {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du serveur: " + trame);
+                if (admin.adminUI != null) admin.adminUI.addLog("Trame reçue du serveur: " + trame);
 
                 if ("ROUTING_TABLE".equals(trame.getType())) {
                     // Fusionner la table reçue avec la table locale
@@ -104,11 +106,13 @@ public class Serveur {
                     // Si le client est local, délivrer
                     if ("local".equals(admin.getRoutingTable().get(destClient))) {
                         admin.sendMessageToClient(destClient, message, trame.getClientNameSrc());
+                        if (admin.adminUI != null) admin.adminUI.addLog("Message délivré à " + destClient + " : " + message);
                     } else {
                         // Sinon, router vers le bon serveur
                         String nextHop = admin.getRoutingTable().get(destClient);
                         if (nextHop != null && !nextHop.equals(trame.getServerIpDest())) {
                             sendTrameToServer(trame, nextHop);
+                            if (admin.adminUI != null) admin.adminUI.addLog("Routage de la trame vers " + nextHop + " : " + trame);
                         }
                     }
                 }

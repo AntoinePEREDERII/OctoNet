@@ -8,9 +8,10 @@ import java.util.HashMap;
 class ClientWindow extends JFrame {
     private String clientName;
     private JTextArea messageArea;
-    private JTextField destField;      // Nouveau champ pour le destinataire
+    private JTextField destField;
     private JTextField messageField;
     private Admin admin;
+    private String lastSender = ""; // Nouveau : mémorise le dernier expéditeur
 
     public ClientWindow(String clientName, Admin admin) {
         super("Client: " + clientName);
@@ -56,7 +57,6 @@ class ClientWindow extends JFrame {
             String dest = destField.getText();
             String message = messageField.getText();
             if (!dest.isEmpty() && !message.isEmpty()) {
-                // Utilise la table de routage pour router le message
                 admin.sendMessageFromClientToClient(clientName, dest, message);
                 messageArea.append("Vous à " + dest + " : " + message + "\n");
                 messageField.setText("");
@@ -67,6 +67,15 @@ class ClientWindow extends JFrame {
     }
 
     public void addMessage(String message) {
+        // Recherche du nom de l'expéditeur dans le message (format attendu : "Reçu: <message>" ou "De <nom>: <message>")
+        // Ici, on suppose que le format est "De <nom>: <message>"
+        if (message.startsWith("De ")) {
+            int idx = message.indexOf(':');
+            if (idx > 3) {
+                lastSender = message.substring(3, idx).trim();
+                destField.setText(lastSender); // Met à jour automatiquement le champ destinataire
+            }
+        }
         messageArea.append(message + "\n");
     }
 }

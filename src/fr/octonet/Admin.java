@@ -50,7 +50,7 @@ public class Admin {
                 }
                 // Affichage dans la fenêtre du client destinataire (si UI)
                 if (AdminUI.clientWindows != null && AdminUI.clientWindows.containsKey(clientName)) {
-                    AdminUI.clientWindows.get(clientName).addMessage("Reçu: " + message);
+                    AdminUI.clientWindows.get(clientName).addMessage("De " + clientName + " : " + message);
                 }
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'envoi du message à " + clientName + ": " + e.getMessage());

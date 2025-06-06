@@ -134,24 +134,6 @@ public class Admin {
         }
     }
 
-    public void sendMessageToClient(String source, String destination, String message) {
-        try {
-            Client sourceClient = clients.get(source);
-            Client destClient = clients.get(destination);
-            
-            if (sourceClient == null || destClient == null) {
-                System.err.println("Client source ou destination non trouvé");
-                return;
-            }
-            
-            // Envoyer le message
-            sourceClient.sendMessage(source, message);
-            System.out.println("Message envoyé de " + source + " à " + destination);
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'envoi du message: " + e.getMessage());
-        }
-    }
-
     public void setAdminUI(AdminUI ui) {
         this.adminUI = ui;
     }

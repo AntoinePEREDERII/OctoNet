@@ -48,6 +48,10 @@ public class Admin {
                 if (adminUI != null) {
                     adminUI.addMessageToClientWindow(clientName, message);
                 }
+                // Affichage dans la fenêtre du client destinataire (si UI)
+                if (AdminUI.clientWindows != null && AdminUI.clientWindows.containsKey(clientName)) {
+                    AdminUI.clientWindows.get(clientName).addMessage("Reçu: " + message);
+                }
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'envoi du message à " + clientName + ": " + e.getMessage());
             }
@@ -123,5 +127,13 @@ public class Admin {
 
     public void setAdminUI(AdminUI ui) {
         this.adminUI = ui;
+    }
+
+    // Ajoute ce setter si pas déjà présent
+    public String getLocalIP() {
+        return localIP;
+    }
+    public int getPortListenCl() {
+        return portListenCl;
     }
 }

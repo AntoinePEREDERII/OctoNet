@@ -31,7 +31,7 @@ class ClientWindow extends JFrame {
         JPanel inputPanel = new JPanel(new BorderLayout());
         messageField = new JTextField();
         JButton sendButton = new JButton("Envoyer");
-        
+
         inputPanel.add(messageField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
 
@@ -41,7 +41,8 @@ class ClientWindow extends JFrame {
         sendButton.addActionListener(e -> {
             String message = messageField.getText();
             if (!message.isEmpty()) {
-                admin.sendMessageToClient(clientName, message);
+                // Envoi du message à travers l'admin, en précisant la source et la destination
+                admin.sendMessageFromClientToClient(clientName, clientName, message);
                 messageArea.append("Vous: " + message + "\n");
                 messageField.setText("");
             }
@@ -63,18 +64,23 @@ public class AdminUI extends JFrame {
     private JTextField clientDestField;
     private JTextField messageField;
     private Admin admin;
-    private Map<String, ClientWindow> clientWindows;
+    public static Map<String, ClientWindow> clientWindows;
+    private JLabel serverInfoLabel;
 
     public AdminUI(Admin admin) {
         super("Admin Interface");
         this.admin = admin;
-        this.clientWindows = new HashMap<>();
+        clientWindows = new HashMap<>();
 
         setSize(600, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
+
+        // Affichage de l'IP et port du serveur local
+        serverInfoLabel = new JLabel("Serveur local : " + admin.getLocalIP() + ":" + admin.getPortListenCl());
+        mainPanel.add(serverInfoLabel, BorderLayout.NORTH);
 
         // Panel pour les clients
         clientListModel = new DefaultListModel<>();
@@ -190,27 +196,12 @@ public class AdminUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                // Attendre un peu pour s'assurer que les ports sont libérés
-                Thread.sleep(1000);
-                
-                Admin admin = new Admin();
-                AdminUI adminUI = new AdminUI(admin);
-                admin.setAdminUI(adminUI);  // Lier l'UI à l'Admin
-                admin.startSrv();
-                
-                // Attendre que le serveur démarre
-                Thread.sleep(500);
-                
-                adminUI.setVisible(true);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                    "Erreur au démarrage : " + e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        });
+        try {
+            Admin admin = new Admin();
+            AdminUI adminUI = new AdminUI(admin);
+            adminUI.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

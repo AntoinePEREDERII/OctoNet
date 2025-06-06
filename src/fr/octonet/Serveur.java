@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Serveur {
     private int portListenCl;
@@ -87,12 +88,29 @@ public class Serveur {
             while (true) {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du serveur: " + trame);
-                
-                // Traiter la trame
-                if (trame.getType().equals("CLIENT")) {
+
+                if ("ROUTING_TABLE".equals(trame.getType())) {
+                    // Fusionner la table reçue avec la table locale
+                    Map<String, String> receivedTable = trame.getRoutingTable();
+                    for (Map.Entry<String, String> entry : receivedTable.entrySet()) {
+                        // Si le client n'est pas local, ajoute/maj la route
+                        if (!admin.getRoutingTable().containsKey(entry.getKey())) {
+                            admin.getRoutingTable().put(entry.getKey(), trame.getServerIpDest());
+                        }
+                    }
+                } else if ("CLIENT".equals(trame.getType())) {
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
-                    admin.sendMessageToClient(destClient, message);
+                    // Si le client est local, délivrer
+                    if ("local".equals(admin.getRoutingTable().get(destClient))) {
+                        admin.sendMessageToClient(destClient, message, trame.getClientNameSrc());
+                    } else {
+                        // Sinon, router vers le bon serveur
+                        String nextHop = admin.getRoutingTable().get(destClient);
+                        if (nextHop != null && !nextHop.equals(trame.getServerIpDest())) {
+                            sendTrameToServer(trame, nextHop);
+                        }
+                    }
                 }
             }
         } catch (IOException | ClassNotFoundException e) {

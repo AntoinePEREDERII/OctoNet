@@ -112,9 +112,12 @@ public class Admin {
             if (!entry.isEmpty()) {
                 String[] parts = entry.split("=");
                 if (parts.length == 2) {
-                    routingTable.put(parts[0], parts[1]);
+                    String clientName = parts[0];
+                    String serverAddress = parts[1];
+                    // Ne pas créer de client local, juste mettre à jour la table de routage
+                    routingTable.put(clientName, serverAddress);
                     if (adminUI != null) {
-                        adminUI.addClientToList(parts[0]);
+                        adminUI.addClientToList(clientName);
                     }
                 }
             }
@@ -134,9 +137,10 @@ public class Admin {
     public void sendMessageFromClientToClient(String from, String to, String message) {
         String nextHop = routingTable.get(to);
         if (nextHop == null) {
-            System.err.println("Destination inconnue dans la table de routage.");
+            System.err.println("Destination inconnue dans la table de routage: " + to);
             return;
         }
+
         // Si le destinataire est local
         if (nextHop.equals(localIP + ":" + serveur.getPort())) {
             sendMessage(from, to, message);

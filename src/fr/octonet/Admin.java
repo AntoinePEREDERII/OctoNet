@@ -56,12 +56,25 @@ public class Admin {
     }
 
     public void addClient(String clientName) {
+        // Vérifier si le client existe déjà
+        if (routingTable.containsKey(clientName)) {
+            System.err.println("Le client " + clientName + " existe déjà");
+            return;
+        }
+
+        // Créer le client local
         Client client = new Client(clientName);
         clients.put(clientName, client);
-        routingTable.put(clientName, localIP + ":" + serveur.getPort());
+        
+        // Ajouter le client à la table de routage avec l'adresse locale
+        String localAddress = localIP + ":" + serveur.getPort();
+        routingTable.put(clientName, localAddress);
+        
         if (adminUI != null) {
             adminUI.addClientToList(clientName);
         }
+        
+        System.out.println("Client local ajouté: " + clientName + " sur " + localAddress);
     }
 
     public void addRemoteClient(String clientName, String serverAddress) {
@@ -114,10 +127,16 @@ public class Admin {
                 if (parts.length == 2) {
                     String clientName = parts[0];
                     String serverAddress = parts[1];
-                    // Ne pas créer de client local, juste mettre à jour la table de routage
-                    routingTable.put(clientName, serverAddress);
-                    if (adminUI != null) {
-                        adminUI.addClientToList(clientName);
+                    
+                    // Ne pas ajouter le client s'il est déjà géré localement
+                    if (!routingTable.containsKey(clientName) || 
+                        !routingTable.get(clientName).equals(localIP + ":" + serveur.getPort())) {
+                        // Ajouter le client avec l'adresse du serveur distant
+                        routingTable.put(clientName, serverAddress);
+                        if (adminUI != null) {
+                            adminUI.addClientToList(clientName);
+                        }
+                        System.out.println("Client distant ajouté: " + clientName + " via " + serverAddress);
                     }
                 }
             }

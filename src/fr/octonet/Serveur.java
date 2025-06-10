@@ -74,13 +74,19 @@ public class Serveur {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du client: " + trame);
                 
-                if (trame.getType().equals("CLIENT")) {
-                    String sourceClient = trame.getClientNameSrc();
+                if ("CLIENT".equals(trame.getType())) {
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
-                    
-                    if (destClient != null && !destClient.equals(sourceClient)) {
-                        admin.sendMessage(sourceClient, destClient, message);
+                    String fromClient = trame.getClientNameSrc();
+                    // Vérifie si le client destinataire est local
+                    if (admin.getRoutingTable().get(destClient).equals(admin.getLocalIP() + ":" + getPort())) {
+                        admin.sendMessage(fromClient, destClient, message);
+                    } else {
+                        // Sinon, route à nouveau (multi-sauts possible)
+                        String nextHop = admin.getRoutingTable().get(destClient);
+                        if (nextHop != null && !nextHop.equals(trame.getServerIpDest())) {
+                            sendTrameToServer(trame, nextHop);
+                        }
                     }
                 }
             }
@@ -149,14 +155,13 @@ public class Serveur {
             String[] parts = serverAddress.split(":");
             String host = parts[0];
             int port = Integer.parseInt(parts[1]);
-            Socket socket = new Socket(host, port);
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(trame);
-            out.flush();
-            out.close();
-            socket.close();
+            try (Socket socket = new Socket(host, port);
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                out.writeObject(trame);
+                out.flush();
+            }
         } catch (Exception e) {
-            System.err.println("Erreur d'envoi au serveur " + serverAddress + ": " + e.getMessage());
+            System.err.println("Erreur lors de l'envoi de la trame au serveur distant : " + e.getMessage());
         }
     }
 

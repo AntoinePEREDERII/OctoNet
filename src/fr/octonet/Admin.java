@@ -100,6 +100,27 @@ public class Admin {
         }
     }
 
+    public void sendMessageFromClientToClient(String from, String to, String message) {
+        String nextHop = routingTable.get(to);
+        if (nextHop == null) {
+            System.err.println("Destination inconnue dans la table de routage.");
+            return;
+        }
+        // Si le destinataire est local
+        if (nextHop.equals(localIP + ":" + serveur.getPort())) {
+            sendMessage(from, to, message);
+        } else {
+            // Envoi via le serveur distant
+            Trame trame = new Trame();
+            trame.setType("CLIENT");
+            trame.setClientNameSrc(from);
+            trame.setClientNameDest(to);
+            trame.setData(message);
+            trame.setServerIpDest(nextHop);
+            serveur.sendTrameToServer(trame, nextHop);
+        }
+    }
+
     public Map<String, String> getRoutingTable() {
         return routingTable;
     }

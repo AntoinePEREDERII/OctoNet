@@ -73,7 +73,6 @@ public class Admin {
     public void addRemoteServer(String serverAddress) {
         if (!remoteServers.contains(serverAddress)) {
             try {
-                // Tente une connexion pour vérifier que le serveur distant est joignable
                 String[] parts = serverAddress.split(":");
                 String host = parts[0];
                 int port = Integer.parseInt(parts[1]);

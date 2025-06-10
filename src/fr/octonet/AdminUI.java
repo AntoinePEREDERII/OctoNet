@@ -81,8 +81,6 @@ public class AdminUI extends JFrame {
             String serverAddress = serverAddressField.getText();
             if (!serverAddress.isEmpty()) {
                 admin.addRemoteServer(serverAddress);
-                JOptionPane.showMessageDialog(AdminUI.this,
-                        "Serveur ajouté: " + serverAddress);
                 serverAddressField.setText("");
                 updateRoutingTable(routingTableArea);
             }

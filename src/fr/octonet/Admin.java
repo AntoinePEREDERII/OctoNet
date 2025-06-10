@@ -24,9 +24,13 @@ public class Admin {
             this.localIP = "127.0.0.1";
             System.err.println("Erreur lors de la récupération de l'adresse IP: " + e.getMessage());
         }
+        // Initialiser le serveur d'abord
         this.serveur = new Serveur(this);
-        this.adminUI = new AdminUI(this);
         new Thread(() -> serveur.start()).start();
+        // Puis initialiser l'interface
+        this.adminUI = new AdminUI(this);
+        // Configurer l'interface dans le serveur
+        this.serveur.setAdminUI(this.adminUI);
     }
 
     public String getLocalIP() {
@@ -89,8 +93,7 @@ public class Admin {
             try {
                 String[] parts = serverAddress.split(":");
                 String host = parts[0];
-                int port = Integer.parseInt(parts[1]);
-                // Se connecter au port serveur (12346) au lieu du port client (12345)
+                // Le port n'est pas utilisé car on se connecte toujours au port 12346
                 try (Socket socket = new Socket(host, 12346)) {
                     remoteServers.add(serverAddress);
                     System.out.println("Serveur distant ajouté: " + serverAddress);
@@ -184,6 +187,10 @@ public class Admin {
 
     public void setAdminUI(AdminUI adminUI) {
         this.adminUI = adminUI;
+    }
+
+    public AdminUI getAdminUI() {
+        return adminUI;
     }
 }
 

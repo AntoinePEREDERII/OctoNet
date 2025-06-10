@@ -1,102 +1,92 @@
 package fr.octonet;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Serveur {
-    private int portListenCl;
-    private int portListenSrv;
-    private Admin admin;
-    private List<Socket> remoteServerSockets = new ArrayList<>();
-    private List<Socket> clientSockets = new ArrayList<>();
+    private final Admin admin;
+    private final int portClient;
+    private final int portServeur;
+    private final Set<Socket> clientSockets = new HashSet<>();
+    private final Set<Socket> remoteServerSockets = new HashSet<>();
+    private ServerSocket serverSocketClient;
+    private ServerSocket serverSocketServeur;
     private AdminUI adminUI; // Référence à l'interface admin
 
-    public Serveur(Admin admin, AdminUI adminUI) {
+    public Serveur(Admin admin) {
         this.admin = admin;
-        this.adminUI = adminUI;
-        this.portListenCl = 12345; // Port fixe pour les clients
-        this.portListenSrv = 12346; // Port fixe pour les serveurs
+        this.portClient = 12345;
+        this.portServeur = 12346;
     }
 
-    public int getPort() {
-        return portListenCl;
+    public void setAdminUI(AdminUI adminUI) {
+        this.adminUI = adminUI;
     }
 
     public void start() {
-        new Thread(this::listenCl).start();
-        new Thread(this::listenSrv).start();
-    }
-
-    public void listenCl() {
-        try (ServerSocket serverSocket = new ServerSocket(portListenCl)) {
-            System.out.println("Serveur démarré. En attente de connexion client sur le port " + portListenCl);
-
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                clientSockets.add(clientSocket);
-                System.out.println("Nouveau client connecté: " + clientSocket.getInetAddress());
-                if (adminUI != null) adminUI.addLog("Nouveau client connecté: " + clientSocket.getInetAddress());
-                new Thread(() -> handleClient(clientSocket)).start();
+        // Démarrer le serveur pour les clients
+        new Thread(() -> {
+            try {
+                serverSocketClient = new ServerSocket(portClient);
+                System.out.println("Serveur démarré. En attente de connexion client sur le port " + portClient);
+                while (true) {
+                    Socket clientSocket = serverSocketClient.accept();
+                    clientSockets.add(clientSocket);
+                    System.out.println("Nouveau client connecté: " + clientSocket.getInetAddress());
+                    if (adminUI != null) adminUI.addLog("Nouveau client connecté: " + clientSocket.getInetAddress());
+                    new Thread(() -> handleClient(clientSocket)).start();
+                }
+            } catch (IOException e) {
+                if (e.getMessage().contains("Address already in use")) {
+                    System.err.println("Le port " + portClient + " est déjà utilisé. Veuillez attendre quelques secondes ou redémarrer l'application.");
+                } else {
+                    e.printStackTrace();
+                }
             }
-        } catch (IOException e) {
-            if (e.getMessage().contains("Address already in use")) {
-                System.err.println("Le port " + portListenCl + " est déjà utilisé. Veuillez attendre quelques secondes ou redémarrer l'application.");
-            } else {
-                e.printStackTrace();
-            }
-        }
-    }
+        }).start();
 
-    public void listenSrv() {
-        try (ServerSocket serverSocket = new ServerSocket(portListenSrv)) {
-            System.out.println("Serveur démarré. En attente de connexion serveur sur le port " + portListenSrv);
-
-            while (true) {
-                Socket serverSocketConnection = serverSocket.accept();
-                remoteServerSockets.add(serverSocketConnection);
-                System.out.println("Nouveau serveur distant connecté: " + serverSocketConnection.getInetAddress());
-                if (adminUI != null) adminUI.addLog("Nouveau serveur distant connecté: " + serverSocketConnection.getInetAddress());
-                new Thread(() -> handleServer(serverSocketConnection)).start();
+        // Démarrer le serveur pour les serveurs distants
+        new Thread(() -> {
+            try {
+                serverSocketServeur = new ServerSocket(portServeur);
+                System.out.println("Serveur démarré. En attente de connexion serveur sur le port " + portServeur);
+                while (true) {
+                    Socket serverSocket = serverSocketServeur.accept();
+                    remoteServerSockets.add(serverSocket);
+                    System.out.println("Nouveau serveur distant connecté: " + serverSocket.getRemoteSocketAddress());
+                    if (adminUI != null) adminUI.addLog("Nouveau serveur distant connecté: " + serverSocket.getRemoteSocketAddress());
+                    new Thread(() -> handleServer(serverSocket)).start();
+                }
+            } catch (IOException e) {
+                if (e.getMessage().contains("Address already in use")) {
+                    System.err.println("Le port " + portServeur + " est déjà utilisé. Veuillez attendre quelques secondes ou redémarrer l'application.");
+                } else {
+                    e.printStackTrace();
+                }
             }
-        } catch (IOException e) {
-            if (e.getMessage().contains("Address already in use")) {
-                System.err.println("Le port " + portListenSrv + " est déjà utilisé. Veuillez attendre quelques secondes ou redémarrer l'application.");
-            } else {
-                e.printStackTrace();
-            }
-        }
+        }).start();
     }
 
     private void handleClient(Socket clientSocket) {
-        try (ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream())) {
+        try {
+            ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
             while (true) {
                 Trame trame = (Trame) in.readObject();
-                System.out.println("Trame reçue du client: " + trame);
-                
-                if ("CLIENT".equals(trame.getType())) {
-                    String destClient = trame.getClientNameDest();
-                    String message = (String) trame.getData();
-                    String fromClient = trame.getClientNameSrc();
-                    // Vérifie si le client destinataire est local
-                    if (admin.getRoutingTable().get(destClient).equals(admin.getLocalIP() + ":" + getPort())) {
-                        admin.sendMessage(fromClient, destClient, message);
-                    } else {
-                        // Sinon, route à nouveau (multi-sauts possible)
-                        String nextHop = admin.getRoutingTable().get(destClient);
-                        if (nextHop != null && !nextHop.equals(trame.getServerIpDest())) {
-                            sendTrameToServer(trame, nextHop);
-                        }
-                    }
-                }
+                handleTrame(trame, clientSocket);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Erreur de connexion client: " + e.getMessage());
-            clientSockets.remove(clientSocket);
+        } catch (EOFException e) {
+            System.out.println("Client déconnecté");
+        } catch (Exception e) {
+            System.err.println("Erreur client: " + e.getMessage());
+        } finally {
+            try {
+                clientSocket.close();
+                clientSockets.remove(clientSocket);
+            } catch (IOException e) {
+                System.err.println("Erreur fermeture client: " + e.getMessage());
+            }
         }
     }
 
@@ -114,42 +104,10 @@ public class Serveur {
         } finally {
             try {
                 socket.close();
+                remoteServerSockets.remove(socket);
             } catch (IOException e) {
                 System.err.println("Erreur lors de la fermeture de la connexion: " + e.getMessage());
             }
-        }
-    }
-
-    public void connectToRemoteServer(String serverAddress) {
-        try {
-            String[] parts = serverAddress.split(":");
-            String host = parts[0];
-            int port = Integer.parseInt(parts[1]);
-            try (Socket socket = new Socket(host, port);
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-                Trame trame = new Trame();
-                trame.setType("ROUTING");
-                trame.setData(serializeRoutingTable(admin.getRoutingTable()));
-                out.writeObject(trame);
-                out.flush();
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
-        }
-    }
-
-    public void sendTrameToServer(Trame trame, String serverAddress) {
-        try {
-            String[] parts = serverAddress.split(":");
-            String host = parts[0];
-            int port = Integer.parseInt(parts[1]);
-            try (Socket socket = new Socket(host, port);
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-                out.writeObject(trame);
-                out.flush();
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'envoi de la trame au serveur: " + e.getMessage());
         }
     }
 
@@ -191,6 +149,43 @@ public class Serveur {
         if (adminUI != null) adminUI.addLog("Table de routage mise à jour");
     }
 
+    public void sendTrameToServer(Trame trame, String serverAddress) {
+        try {
+            String[] parts = serverAddress.split(":");
+            String host = parts[0];
+            int port = Integer.parseInt(parts[1]);
+            try (Socket socket = new Socket(host, port);
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                out.writeObject(trame);
+                out.flush();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi de la trame au serveur: " + e.getMessage());
+        }
+    }
+
+    public int getPort() {
+        return portClient;
+    }
+
+    public void connectToRemoteServer(String serverAddress) {
+        try {
+            String[] parts = serverAddress.split(":");
+            String host = parts[0];
+            int port = Integer.parseInt(parts[1]);
+            try (Socket socket = new Socket(host, port);
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                Trame trame = new Trame();
+                trame.setType("ROUTING");
+                trame.setData(serializeRoutingTable(admin.getRoutingTable()));
+                out.writeObject(trame);
+                out.flush();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
+        }
+    }
+
     private String serializeRoutingTable(Map<String, String> table) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : table.entrySet()) {
@@ -201,29 +196,5 @@ public class Serveur {
 
     public static void main(String[] args) {
         Admin admin = new Admin();
-        // Remplir la table de routage pour l'exemple
-        admin.getRoutingTable().put("clientB", "192.168.1.2:9081");
-
-        AdminUI adminUI = new AdminUI(); // Création de l'interface admin
-        Serveur serveur = new Serveur(admin, adminUI);
-        serveur.start();
-
-        // Attendre un moment que les serveurs écoutent
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Tester la connexion à un serveur distant
-        serveur.connectToRemoteServer("192.168.1.2:9081");
-
-        // Création et envoi d'une trame client
-        Trame trameClient = new Trame();
-        trameClient.setType("CLIENT");
-        trameClient.setClientNameSrc("clientA");
-        trameClient.setClientNameDest("clientB");
-        trameClient.setServerIpDest("192.168.1.2:9081"); // serveur cible
-        trameClient.setData("Coucou !");
     }
 }

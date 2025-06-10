@@ -167,7 +167,7 @@ public class AdminUI extends JFrame {
     public void addMessageToClientWindow(String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {
-            window.addMessage(message);
+            window.receiveMessage(clientName, message);
         }
     }
 

@@ -231,6 +231,7 @@ public class AdminUI extends JFrame {
     // Méthode utilitaire pour ajouter un log
     public void addLog(String log) {
         logArea.append(log + "\n");
+        logArea.setCaretPosition(logArea.getDocument().getLength()); // Scroll auto
     }
 
     public static void main(String[] args) {

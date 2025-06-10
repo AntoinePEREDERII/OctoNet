@@ -5,84 +5,6 @@ import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 
-class ClientWindow extends JFrame {
-    private String clientName;
-    private JTextArea messageArea;
-    private JTextField destField;
-    private JTextField messageField;
-    private Admin admin;
-    private String lastSender = ""; // Nouveau : mémorise le dernier expéditeur
-
-    public ClientWindow(String clientName, Admin admin) {
-        super("Client: " + clientName);
-        this.clientName = clientName;
-        this.admin = admin;
-
-        setSize(400, 350);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        JPanel mainPanel = new JPanel(new BorderLayout());
-
-        // Zone de messages
-        messageArea = new JTextArea();
-        messageArea.setEditable(false);
-        mainPanel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
-
-        // Panel pour envoyer des messages
-        JPanel inputPanel = new JPanel(new BorderLayout());
-
-        // Champ pour le destinataire
-        JPanel destPanel = new JPanel(new BorderLayout());
-        destPanel.add(new JLabel("Destinataire : "), BorderLayout.WEST);
-        destField = new JTextField();
-        destPanel.add(destField, BorderLayout.CENTER);
-
-        inputPanel.add(destPanel, BorderLayout.NORTH);
-
-        // Champ pour le message
-        messageField = new JTextField();
-        JButton sendButton = new JButton("Envoyer");
-
-        // Ajout de l'action pour envoyer le message en appuyant sur Entrée
-        messageField.addActionListener(e -> sendButton.doClick());
-
-        JPanel msgPanel = new JPanel(new BorderLayout());
-        msgPanel.add(messageField, BorderLayout.CENTER);
-        msgPanel.add(sendButton, BorderLayout.EAST);
-
-        inputPanel.add(msgPanel, BorderLayout.SOUTH);
-
-        mainPanel.add(inputPanel, BorderLayout.SOUTH);
-
-        // Action pour envoyer un message
-        sendButton.addActionListener(e -> {
-            String dest = destField.getText();
-            String message = messageField.getText();
-            if (!dest.isEmpty() && !message.isEmpty()) {
-                admin.sendMessageFromClientToClient(clientName, dest, message);
-                messageArea.append("Vous à " + dest + " : " + message + "\n");
-                messageField.setText("");
-            }
-        });
-
-        add(mainPanel);
-    }
-
-    public void addMessage(String message) {
-        // Recherche du nom de l'expéditeur dans le message (format attendu : "Reçu: <message>" ou "De <nom>: <message>")
-        // Ici, on suppose que le format est "De <nom>: <message>"
-        if (message.startsWith("De ")) {
-            int idx = message.indexOf(':');
-            if (idx > 3) {
-                lastSender = message.substring(3, idx).trim();
-                destField.setText(lastSender); // Met à jour automatiquement le champ destinataire
-            }
-        }
-        messageArea.append(message + "\n");
-    }
-}
-
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
     private JList<String> clientJList;
@@ -99,7 +21,7 @@ public class AdminUI extends JFrame {
         this.admin = admin;
         clientWindows = new HashMap<>();
 
-        setSize(900, 600); // Taille augmentée
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -117,7 +39,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(clientScrollPane, BorderLayout.WEST);
 
         // Panel pour les serveurs distants et les messages
-        JPanel controlPanel = new JPanel(new GridLayout(12, 1, 5, 5)); // 12 lignes pour tout afficher
+        JPanel controlPanel = new JPanel(new GridLayout(12, 1, 5, 5));
 
         serverAddressField = new JTextField();
         controlPanel.add(new JLabel("Adresse du Serveur distant (ip:port):"));
@@ -168,11 +90,12 @@ public class AdminUI extends JFrame {
 
         // Action pour ajouter un client
         addClientButton.addActionListener(e -> {
-            Client client = admin.newClient();
-            String clientName = client.getName();
-            clientListModel.addElement(clientName);
-            showClientWindow(clientName);
-            updateRoutingTable(routingTableArea);
+            String clientName = clientSrcField.getText();
+            if (!clientName.isEmpty()) {
+                admin.addClient(clientName);
+                clientSrcField.setText("");
+                updateRoutingTable(routingTableArea);
+            }
         });
 
         // Action pour envoyer un message d'un client à un autre
@@ -181,8 +104,7 @@ public class AdminUI extends JFrame {
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
             if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
-                // Utilise la table de routage pour router le message
-                admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
+                admin.sendMessage(clientSrc, clientDest, message);
                 JOptionPane.showMessageDialog(AdminUI.this,
                         "Message envoyé de " + clientSrc + " à " + clientDest + ": " + message);
                 messageField.setText("");
@@ -195,6 +117,13 @@ public class AdminUI extends JFrame {
         add(mainPanel);
     }
 
+    public void addClientToList(String clientName) {
+        if (!clientListModel.contains(clientName)) {
+            clientListModel.addElement(clientName);
+            showClientWindow(clientName);
+        }
+    }
+
     private void showClientWindow(String clientName) {
         ClientWindow window = clientWindows.get(clientName);
         if (window == null) {
@@ -204,7 +133,6 @@ public class AdminUI extends JFrame {
         window.setVisible(true);
     }
 
-    // Méthode pour afficher la table de routage
     private void updateRoutingTable(JTextArea area) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {

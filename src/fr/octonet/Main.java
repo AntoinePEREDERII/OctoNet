@@ -1,9 +1,18 @@
 package fr.octonet;
 
+import javax.swing.SwingUtilities;
+
 public class Main {
     public static void main(String[] args) {
-        Admin admin = new Admin();
-        admin.startSrv();
-        admin.newClient();
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Admin admin = new Admin();
+                AdminUI adminUI = new AdminUI(admin);
+                admin.setAdminUI(adminUI);
+                adminUI.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

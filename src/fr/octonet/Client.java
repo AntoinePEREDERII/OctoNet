@@ -8,6 +8,10 @@ public class Client {
     private int serverPort;
     private String name;
 
+    public Client(String name) {
+        this.name = name;
+    }
+
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
@@ -16,6 +20,11 @@ public class Client {
 
     public String getName() {
         return name;
+    }
+
+    public void receiveMessage(String from, String message) {
+        // Cette méthode est appelée quand un message est reçu
+        System.out.println("Message reçu de " + from + ": " + message);
     }
 
     public void sendMessage(String destClient, String message) {

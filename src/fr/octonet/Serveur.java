@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Serveur {
     private int portListenCl;
@@ -14,10 +15,19 @@ public class Serveur {
     private List<Socket> remoteServerSockets = new ArrayList<>();
     private List<Socket> clientSockets = new ArrayList<>();
 
-    public Serveur(int portListenCl, int portListenSrv, Admin admin) {
-        this.portListenCl = portListenCl;
-        this.portListenSrv = portListenSrv;
+    public Serveur(Admin admin) {
         this.admin = admin;
+        this.portListenCl = 12345; // Port fixe pour les clients
+        this.portListenSrv = 12346; // Port fixe pour les serveurs
+    }
+
+    public int getPort() {
+        return portListenCl;
+    }
+
+    public void start() {
+        new Thread(this::listenCl).start();
+        new Thread(this::listenSrv).start();
     }
 
     public void listenCl() {
@@ -64,15 +74,13 @@ public class Serveur {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du client: " + trame);
                 
-                // Traiter la trame
                 if (trame.getType().equals("CLIENT")) {
                     String sourceClient = trame.getClientNameSrc();
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
                     
                     if (destClient != null && !destClient.equals(sourceClient)) {
-                        // Envoyer uniquement si le destinataire est différent de l'expéditeur
-                        admin.sendMessageToClient(destClient, message);
+                        admin.sendMessage(sourceClient, destClient, message);
                     }
                 }
             }
@@ -88,11 +96,19 @@ public class Serveur {
                 Trame trame = (Trame) in.readObject();
                 System.out.println("Trame reçue du serveur: " + trame);
                 
-                // Traiter la trame
                 if (trame.getType().equals("CLIENT")) {
+                    String sourceClient = trame.getClientNameSrc();
                     String destClient = trame.getClientNameDest();
                     String message = (String) trame.getData();
-                    admin.sendMessageToClient(destClient, message);
+                    admin.sendMessage(sourceClient, destClient, message);
+                } else if (trame.getType().equals("ROUTING_TABLE")) {
+                    // Mise à jour de la table de routage avec les clients distants
+                    Map<String, String> remoteTable = trame.getRoutingTable();
+                    for (Map.Entry<String, String> entry : remoteTable.entrySet()) {
+                        if (!entry.getValue().equals("local")) {
+                            admin.addRemoteClient(entry.getKey(), entry.getValue());
+                        }
+                    }
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -120,6 +136,9 @@ public class Serveur {
             out.writeObject(trameRouting);
             out.flush();
 
+            // Démarrer un thread pour écouter les réponses du serveur distant
+            new Thread(() -> handleServer(socket)).start();
+
         } catch (Exception e) {
             System.err.println("Erreur de connexion au serveur distant " + address + ": " + e.getMessage());
         }
@@ -141,16 +160,13 @@ public class Serveur {
         }
     }
 
-    // Ajoutez ici la logique de routage et de diffusion des tables de routage
-
     public static void main(String[] args) {
         Admin admin = new Admin();
         // Remplir la table de routage pour l'exemple
         admin.getRoutingTable().put("clientB", "192.168.1.2:9081");
 
-        Serveur serveur = new Serveur(8080, 9090, admin);
-        new Thread(serveur::listenCl).start();
-        new Thread(serveur::listenSrv).start();
+        Serveur serveur = new Serveur(admin);
+        serveur.start();
 
         // Attendre un moment que les serveurs écoutent
         try {

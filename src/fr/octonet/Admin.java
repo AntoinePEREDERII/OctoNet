@@ -1,5 +1,6 @@
 package fr.octonet;
 
+import java.net.Socket;
 import java.util.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;

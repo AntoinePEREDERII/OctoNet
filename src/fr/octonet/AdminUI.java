@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
+import java.net.Socket;
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;

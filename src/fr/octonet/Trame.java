@@ -1,15 +1,14 @@
 package fr.octonet;
 
 import java.io.Serializable;
-import java.util.Map;
 
 public class Trame implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String type; // "CLIENT", "SERVER", "ROUTING_TABLE", etc.
     private String serverIpDest; // IP:port du serveur destinataire
     private String clientNameSrc; // nom du client source (si concerné)
     private String clientNameDest; // nom du client destinataire (si concerné)
-    private Object data; // message, ou autre
-    private Map<String, String> routingTable; // pour l'échange de tables de routage
+    private String data; // message, ou autre
 
     public Trame() {
         this.type = "DEFAULT";
@@ -33,11 +32,8 @@ public class Trame implements Serializable {
     public String getClientNameDest() { return clientNameDest; }
     public void setClientNameDest(String clientNameDest) { this.clientNameDest = clientNameDest; }
 
-    public Object getData() { return data; }
-    public void setData(Object data) { this.data = data; }
-
-    public Map<String, String> getRoutingTable() { return routingTable; }
-    public void setRoutingTable(Map<String, String> routingTable) { this.routingTable = routingTable; }
+    public String getData() { return data; }
+    public void setData(String data) { this.data = data; }
 
     @Override
     public String toString() {
@@ -47,7 +43,6 @@ public class Trame implements Serializable {
                 ", clientNameSrc='" + clientNameSrc + '\'' +
                 ", clientNameDest='" + clientNameDest + '\'' +
                 ", data=" + data +
-                ", routingTable=" + routingTable +
                 '}';
     }
 }

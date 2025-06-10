@@ -96,57 +96,41 @@ public class Serveur {
         }
     }
 
-    private void handleServer(Socket serverSocket) {
-        try (ObjectInputStream in = new ObjectInputStream(serverSocket.getInputStream())) {
+    private void handleServer(Socket socket) {
+        try {
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             while (true) {
                 Trame trame = (Trame) in.readObject();
-                System.out.println("Trame reçue du serveur: " + trame);
-                
-                if (trame.getType().equals("CLIENT")) {
-                    String sourceClient = trame.getClientNameSrc();
-                    String destClient = trame.getClientNameDest();
-                    String message = (String) trame.getData();
-                    admin.sendMessage(sourceClient, destClient, message);
-                } else if (trame.getType().equals("ROUTING_TABLE")) {
-                    // Mise à jour de la table de routage avec les clients distants
-                    Map<String, String> remoteTable = trame.getRoutingTable();
-                    for (Map.Entry<String, String> entry : remoteTable.entrySet()) {
-                        if (!entry.getValue().equals("local")) {
-                            admin.addRemoteClient(entry.getKey(), entry.getValue());
-                        }
-                    }
-                }
+                handleTrame(trame, socket);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Erreur de connexion serveur: " + e.getMessage());
-            remoteServerSockets.remove(serverSocket);
+        } catch (EOFException e) {
+            System.out.println("Connexion au serveur distant fermée");
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la communication avec le serveur distant: " + e.getMessage());
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.err.println("Erreur lors de la fermeture de la connexion: " + e.getMessage());
+            }
         }
     }
 
-    public void connectToRemoteServer(String address) {
+    public void connectToRemoteServer(String serverAddress) {
         try {
-            String[] parts = address.split(":");
+            String[] parts = serverAddress.split(":");
             String host = parts[0];
             int port = Integer.parseInt(parts[1]);
-            Socket socket = new Socket(host, port);
-            remoteServerSockets.add(socket);
-
-            // Création d'une trame contenant la table de routage locale
-            Trame trameRouting = new Trame();
-            trameRouting.setType("ROUTING_TABLE");
-            trameRouting.setRoutingTable(new HashMap<>(admin.getRoutingTable()));
-            trameRouting.setServerIpDest(address);
-
-            // Envoi de la trame au serveur distant
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(trameRouting);
-            out.flush();
-
-            // Démarrer un thread pour écouter les réponses du serveur distant
-            new Thread(() -> handleServer(socket)).start();
-
+            try (Socket socket = new Socket(host, port);
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                Trame trame = new Trame();
+                trame.setType("ROUTING");
+                trame.setData(serializeRoutingTable(admin.getRoutingTable()));
+                out.writeObject(trame);
+                out.flush();
+            }
         } catch (Exception e) {
-            System.err.println("Erreur de connexion au serveur distant " + address + ": " + e.getMessage());
+            System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
         }
     }
 
@@ -161,7 +145,7 @@ public class Serveur {
                 out.flush();
             }
         } catch (Exception e) {
-            System.err.println("Erreur lors de l'envoi de la trame au serveur distant : " + e.getMessage());
+            System.err.println("Erreur lors de l'envoi de la trame au serveur: " + e.getMessage());
         }
     }
 
@@ -186,9 +170,17 @@ public class Serveur {
     }
 
     private void handleRoutingTrame(Trame trame) {
-        String routingData = trame.getData().toString();
+        String routingData = trame.getData();
         admin.updateRoutingTable(routingData);
         System.out.println("Table de routage mise à jour");
+    }
+
+    private String serializeRoutingTable(Map<String, String> table) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : table.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) {

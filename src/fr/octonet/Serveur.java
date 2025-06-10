@@ -165,6 +165,32 @@ public class Serveur {
         }
     }
 
+    private void handleTrame(Trame trame, Socket socket) {
+        switch (trame.getType()) {
+            case "CLIENT":
+                handleClientTrame(trame);
+                break;
+            case "ROUTING":
+                handleRoutingTrame(trame);
+                break;
+            default:
+                System.err.println("Type de trame inconnu: " + trame.getType());
+        }
+    }
+
+    private void handleClientTrame(Trame trame) {
+        String clientName = trame.getClientNameDest();
+        String message = trame.getData();
+        String from = trame.getClientNameSrc();
+        admin.sendMessage(from, clientName, message);
+    }
+
+    private void handleRoutingTrame(Trame trame) {
+        String routingData = trame.getData().toString();
+        admin.updateRoutingTable(routingData);
+        System.out.println("Table de routage mise à jour");
+    }
+
     public static void main(String[] args) {
         Admin admin = new Admin();
         // Remplir la table de routage pour l'exemple

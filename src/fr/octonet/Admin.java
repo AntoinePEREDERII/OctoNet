@@ -77,9 +77,17 @@ public class Admin {
                 String[] parts = serverAddress.split(":");
                 String host = parts[0];
                 int port = Integer.parseInt(parts[1]);
-                try (Socket socket = new Socket(host, port)) {
+                // Se connecter au port serveur (12346) au lieu du port client (12345)
+                try (Socket socket = new Socket(host, 12346)) {
                     remoteServers.add(serverAddress);
                     System.out.println("Serveur distant ajouté: " + serverAddress);
+                    
+                    // Échanger les tables de routage
+                    Trame trame = new Trame();
+                    trame.setType("ROUTING");
+                    trame.setData(serializeRoutingTable());
+                    serveur.sendTrameToServer(trame, serverAddress);
+                    
                     return true;
                 }
             } catch (Exception e) {
@@ -88,6 +96,29 @@ public class Admin {
             }
         }
         return false; // déjà présent
+    }
+
+    private String serializeRoutingTable() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : routingTable.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        return sb.toString();
+    }
+
+    public void updateRoutingTable(String serializedTable) {
+        String[] entries = serializedTable.split(";");
+        for (String entry : entries) {
+            if (!entry.isEmpty()) {
+                String[] parts = entry.split("=");
+                if (parts.length == 2) {
+                    routingTable.put(parts[0], parts[1]);
+                    if (adminUI != null) {
+                        adminUI.addClientToList(parts[0]);
+                    }
+                }
+            }
+        }
     }
 
     public void sendMessage(String from, String to, String message) {

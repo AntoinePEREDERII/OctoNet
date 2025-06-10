@@ -156,15 +156,13 @@ public class Admin {
     public void sendMessageFromClientToClient(String from, String to, String message) {
         String nextHop = routingTable.get(to);
         if (nextHop == null) {
-            System.err.println("Destination inconnue dans la table de routage: " + to);
+            if (adminUI != null) adminUI.addLog("Destination inconnue dans la table de routage pour " + to);
             return;
         }
-
-        // Si le destinataire est local
         if (nextHop.equals(localIP + ":" + serveur.getPort())) {
             sendMessage(from, to, message);
+            if (adminUI != null) adminUI.addLog("Message délivré localement à " + to);
         } else {
-            // Envoi via le serveur distant
             Trame trame = new Trame();
             trame.setType("CLIENT");
             trame.setClientNameSrc(from);
@@ -172,6 +170,7 @@ public class Admin {
             trame.setData(message);
             trame.setServerIpDest(nextHop);
             serveur.sendTrameToServer(trame, nextHop);
+            if (adminUI != null) adminUI.addLog("Message routé vers " + nextHop + " pour " + to);
         }
     }
 

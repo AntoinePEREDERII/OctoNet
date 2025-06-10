@@ -16,6 +16,7 @@ public class AdminUI extends JFrame {
     private Admin admin;
     public static Map<String, ClientWindow> clientWindows;
     private JLabel serverInfoLabel;
+    private JTextArea logArea;
 
     public AdminUI(Admin admin) {
         super("Admin Interface");
@@ -77,6 +78,13 @@ public class AdminUI extends JFrame {
         routingScrollPane.setPreferredSize(new Dimension(220, 0));
         mainPanel.add(routingScrollPane, BorderLayout.EAST);
 
+        // Zone de log
+        logArea = new JTextArea(8, 40);
+        logArea.setEditable(false);
+        JScrollPane logScrollPane = new JScrollPane(logArea);
+        logScrollPane.setPreferredSize(new Dimension(400, 120));
+        mainPanel.add(logScrollPane, BorderLayout.SOUTH);
+
         // Action pour ajouter un serveur distant
         addServerButton.addActionListener(e -> {
             String serverAddress = serverAddressField.getText();
@@ -118,9 +126,10 @@ public class AdminUI extends JFrame {
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
             if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
-                admin.sendMessage(clientSrc, clientDest, message);
-                JOptionPane.showMessageDialog(AdminUI.this,
-                        "Message envoyé de " + clientSrc + " à " + clientDest + ": " + message);
+                admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
+                if (admin != null && admin.getAdminUI() != null) {
+                    admin.getAdminUI().addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
+                }
                 messageField.setText("");
             } else {
                 JOptionPane.showMessageDialog(AdminUI.this,
@@ -160,6 +169,11 @@ public class AdminUI extends JFrame {
         if (window != null) {
             window.addMessage(message);
         }
+    }
+
+    public void addLog(String log) {
+        logArea.append(log + "\n");
+        logArea.setCaretPosition(logArea.getDocument().getLength());
     }
 
     public static void main(String[] args) {

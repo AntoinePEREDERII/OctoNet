@@ -14,9 +14,11 @@ public class Serveur {
     private Admin admin;
     private List<Socket> remoteServerSockets = new ArrayList<>();
     private List<Socket> clientSockets = new ArrayList<>();
+    private AdminUI adminUI; // Référence à l'interface admin
 
-    public Serveur(Admin admin) {
+    public Serveur(Admin admin, AdminUI adminUI) {
         this.admin = admin;
+        this.adminUI = adminUI;
         this.portListenCl = 12345; // Port fixe pour les clients
         this.portListenSrv = 12346; // Port fixe pour les serveurs
     }
@@ -38,6 +40,7 @@ public class Serveur {
                 Socket clientSocket = serverSocket.accept();
                 clientSockets.add(clientSocket);
                 System.out.println("Nouveau client connecté: " + clientSocket.getInetAddress());
+                if (adminUI != null) adminUI.addLog("Nouveau client connecté: " + clientSocket.getInetAddress());
                 new Thread(() -> handleClient(clientSocket)).start();
             }
         } catch (IOException e) {
@@ -57,6 +60,7 @@ public class Serveur {
                 Socket serverSocketConnection = serverSocket.accept();
                 remoteServerSockets.add(serverSocketConnection);
                 System.out.println("Nouveau serveur distant connecté: " + serverSocketConnection.getInetAddress());
+                if (adminUI != null) adminUI.addLog("Nouveau serveur distant connecté: " + serverSocketConnection.getInetAddress());
                 new Thread(() -> handleServer(serverSocketConnection)).start();
             }
         } catch (IOException e) {
@@ -166,13 +170,25 @@ public class Serveur {
         String clientName = trame.getClientNameDest();
         String message = trame.getData();
         String from = trame.getClientNameSrc();
-        admin.sendMessage(from, clientName, message);
+        String nextHop = admin.getRoutingTable().get(clientName);
+        if (nextHop == null) {
+            if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Destination inconnue dans la table de routage pour " + clientName);
+            return;
+        }
+        if (nextHop.equals(admin.getLocalIP() + ":" + getPort())) {
+            admin.sendMessage(from, clientName, message);
+            if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Message délivré localement à " + clientName);
+        } else {
+            sendTrameToServer(trame, nextHop);
+            if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Message routé vers " + nextHop + " pour " + clientName);
+        }
     }
 
     private void handleRoutingTrame(Trame trame) {
         String routingData = trame.getData();
         admin.updateRoutingTable(routingData);
         System.out.println("Table de routage mise à jour");
+        if (adminUI != null) adminUI.addLog("Table de routage mise à jour");
     }
 
     private String serializeRoutingTable(Map<String, String> table) {
@@ -188,7 +204,8 @@ public class Serveur {
         // Remplir la table de routage pour l'exemple
         admin.getRoutingTable().put("clientB", "192.168.1.2:9081");
 
-        Serveur serveur = new Serveur(admin);
+        AdminUI adminUI = new AdminUI(); // Création de l'interface admin
+        Serveur serveur = new Serveur(admin, adminUI);
         serveur.start();
 
         // Attendre un moment que les serveurs écoutent

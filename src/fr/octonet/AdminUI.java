@@ -80,7 +80,22 @@ public class AdminUI extends JFrame {
         addServerButton.addActionListener(e -> {
             String serverAddress = serverAddressField.getText();
             if (!serverAddress.isEmpty()) {
-                admin.addRemoteServer(serverAddress);
+                boolean success = admin.addRemoteServer(serverAddress);
+                if (success) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Connexion réussie au serveur distant : " + serverAddress,
+                        "Succès",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Impossible de joindre le serveur distant : " + serverAddress,
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
                 serverAddressField.setText("");
                 updateRoutingTable(routingTableArea);
             }

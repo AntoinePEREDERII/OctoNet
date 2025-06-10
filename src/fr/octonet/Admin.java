@@ -70,7 +70,7 @@ public class Admin {
         }
     }
 
-    public void addRemoteServer(String serverAddress) {
+    public boolean addRemoteServer(String serverAddress) {
         if (!remoteServers.contains(serverAddress)) {
             try {
                 String[] parts = serverAddress.split(":");
@@ -79,31 +79,14 @@ public class Admin {
                 try (Socket socket = new Socket(host, port)) {
                     remoteServers.add(serverAddress);
                     System.out.println("Serveur distant ajouté: " + serverAddress);
-                    if (adminUI != null) {
-                        javax.swing.SwingUtilities.invokeLater(() ->
-                            javax.swing.JOptionPane.showMessageDialog(
-                                null,
-                                "Connexion réussie au serveur distant : " + serverAddress,
-                                "Succès",
-                                javax.swing.JOptionPane.INFORMATION_MESSAGE
-                            )
-                        );
-                    }
+                    return true;
                 }
             } catch (Exception e) {
                 System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
-                if (adminUI != null) {
-                    javax.swing.SwingUtilities.invokeLater(() ->
-                        javax.swing.JOptionPane.showMessageDialog(
-                            null,
-                            "Impossible de joindre le serveur distant : " + serverAddress + "\n" + e.getMessage(),
-                            "Erreur",
-                            javax.swing.JOptionPane.ERROR_MESSAGE
-                        )
-                    );
-                }
+                return false;
             }
         }
+        return false; // déjà présent
     }
 
     public void sendMessage(String from, String to, String message) {

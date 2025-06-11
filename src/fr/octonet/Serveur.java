@@ -140,37 +140,49 @@ public class Serveur {
         
         // Mettre à jour l'affichage de la table de routage sur le thread EDT
         if (admin.getAdminUI() != null) {
-            /*
             SwingUtilities.invokeLater(() -> {
                 adminUI.updateRoutingTable();
-                // Ajouter les nouveaux clients à la liste
-                for (String client : admin.getRoutingTable().keySet()) {
-                    adminUI.addClientToList(client);
-                }
             });
-             */
-            // Envoyer automatiquement notre table de routage au serveur source
-        admin.getAdminUI().addLog("Envoi automatique de notre table de routage à " + sourceServer);
-        
-        // Créer une trame de routage avec uniquement nos clients locaux
-        ArrayList<String> localClients = new ArrayList<>();
+        }
+
+        // Vérifier si le serveur source est déjà dans notre table de routage
+        boolean serverAlreadyKnown = false;
         for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
-            if (entry.getValue().equals(admin.getLocalIP() + ":" + getPort())) {
-                localClients.add(entry.getKey());
+            if (entry.getValue().equals(sourceServer)) {
+                serverAlreadyKnown = true;
+                break;
             }
         }
-        
-        Trame_routage responseTrame = new Trame_routage(
-            2,
-            sourceServer,
-            admin.getLocalIP() + ":" + getPort(),
-            new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
-            new ArrayList<>(),
-            new ArrayList<>(Collections.singletonList(localClients)),
-            new ArrayList<>(Collections.singletonList(0))
-        );
-        
-        sendTrameToServer(responseTrame, sourceServer);
+
+        // Envoyer notre table de routage seulement si le serveur source n'est pas déjà connu
+        if (!serverAlreadyKnown) {
+            if (admin.getAdminUI() != null) {
+                admin.getAdminUI().addLog("Envoi automatique de notre table de routage à " + sourceServer);
+            }
+            
+            // Créer une trame de routage avec uniquement nos clients locaux
+            ArrayList<String> localClients = new ArrayList<>();
+            for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
+                if (entry.getValue().equals(admin.getLocalIP() + ":" + getPort())) {
+                    localClients.add(entry.getKey());
+                }
+            }
+            
+            Trame_routage responseTrame = new Trame_routage(
+                2,
+                sourceServer,
+                admin.getLocalIP() + ":" + getPort(),
+                new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
+                new ArrayList<>(),
+                new ArrayList<>(Collections.singletonList(localClients)),
+                new ArrayList<>(Collections.singletonList(0))
+            );
+            
+            sendTrameToServer(responseTrame, sourceServer);
+        } else {
+            if (admin.getAdminUI() != null) {
+                admin.getAdminUI().addLog("Serveur " + sourceServer + " déjà connu, pas d'envoi de table de routage");
+            }
         }
     }
 

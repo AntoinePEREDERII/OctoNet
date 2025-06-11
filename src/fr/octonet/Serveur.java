@@ -27,28 +27,6 @@ public class Serveur {
     }
 
     public void start() {
-        // Démarrer le serveur pour les clients NE SERT A RIEN NORMALEMENT
-        /*new Thread(() -> {
-            try {
-                serverSocketClient = new ServerSocket(portClient);
-                System.out.println("Serveur démarré. En attente de connexion client sur le port " + portClient);
-                while (true) {
-                    Socket clientSocket = serverSocketClient.accept();
-                    clientSockets.add(clientSocket);
-                    System.out.println("Nouveau client connecté: " + clientSocket.getInetAddress());
-                    System.out.println("GIGA PROUT SA MERE !!!!!!!!!!!!!!!");
-                    if (adminUI != null) adminUI.addLog("Nouveau client connecté: " + clientSocket.getInetAddress());
-                    new Thread(() -> handleClient(clientSocket)).start();
-                }
-            } catch (IOException e) {
-                if (e.getMessage().contains("Address already in use")) {
-                    System.err.println("Le port " + portClient + " est déjà utilisé. Veuillez attendre quelques secondes ou redémarrer l'application.");
-                } else {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
-
         // Démarrer le serveur pour les serveurs distants
         new Thread(() -> {
             try {
@@ -70,28 +48,7 @@ public class Serveur {
             }
         }).start();
     }
-/*
-    private void handleClient(Socket clientSocket) {
-        try {
-            ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-            while (true) {
-                Trame trame = (Trame) in.readObject();
-                handleTrame(trame, clientSocket);
-            }
-        } catch (EOFException e) {
-            System.out.println("Client déconnecté");
-        } catch (Exception e) {
-            System.err.println("Erreur client: " + e.getMessage());
-        } finally {
-            try {
-                clientSocket.close();
-                clientSockets.remove(clientSocket);
-            } catch (IOException e) {
-                System.err.println("Erreur fermeture client: " + e.getMessage());
-            }
-        }
-    }
- */
+
     private void handleServer(Socket socket) {
         try {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -157,6 +114,10 @@ public class Serveur {
         System.out.println("Table de routage reçue");
         if (adminUI != null) adminUI.addLog("Table de routage reçue");
         
+        // Récupérer l'adresse du serveur source
+        String sourceServer = trame.getServeur_source();
+        if (adminUI != null) adminUI.addLog("Table reçue du serveur : " + sourceServer);
+        
         // Mettre à jour la table de routage avec les informations reçues
         ArrayList<String> serveurs = trame.getServeurs();
         ArrayList<ArrayList<String>> clients_serveurs = trame.getClients_serveurs();
@@ -178,7 +139,8 @@ public class Serveur {
         }
         
         // Mettre à jour l'affichage de la table de routage sur le thread EDT
-        if (adminUI != null) {
+        if (admin.getAdminUI() != null) {
+            /*
             SwingUtilities.invokeLater(() -> {
                 adminUI.updateRoutingTable();
                 // Ajouter les nouveaux clients à la liste
@@ -186,6 +148,29 @@ public class Serveur {
                     adminUI.addClientToList(client);
                 }
             });
+             */
+            // Envoyer automatiquement notre table de routage au serveur source
+        admin.getAdminUI().addLog("Envoi automatique de notre table de routage à " + sourceServer);
+        
+        // Créer une trame de routage avec uniquement nos clients locaux
+        ArrayList<String> localClients = new ArrayList<>();
+        for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
+            if (entry.getValue().equals(admin.getLocalIP() + ":" + getPort())) {
+                localClients.add(entry.getKey());
+            }
+        }
+        
+        Trame_routage responseTrame = new Trame_routage(
+            2,
+            sourceServer,
+            admin.getLocalIP() + ":" + getPort(),
+            new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
+            new ArrayList<>(),
+            new ArrayList<>(Collections.singletonList(localClients)),
+            new ArrayList<>(Collections.singletonList(0))
+        );
+        
+        sendTrameToServer(responseTrame, sourceServer);
         }
     }
 
@@ -207,20 +192,7 @@ public class Serveur {
     public int getPort() {
         return portServeur;
     }
-/*
-    public void connectToRemoteServer(String serverAddress) {
-        try {
-            String[] parts = serverAddress.split(":");
-            String host = parts[0];
-            int port = Integer.parseInt(parts[1]);
-            try (Socket socket = new Socket(host, port);
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
-        }
-    }
- */
+
     public static void main(String[] args) {
     }
 }

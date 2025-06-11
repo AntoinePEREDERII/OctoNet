@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.Socket;
+import java.util.Random;
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
@@ -112,12 +113,10 @@ public class AdminUI extends JFrame {
 
         // Action pour ajouter un client
         addClientButton.addActionListener(e -> {
-            String clientName = clientSrcField.getText();
-            if (!clientName.isEmpty()) {
-                admin.addClient(clientName);
-                clientSrcField.setText("");
-                updateRoutingTable(routingTableArea);
-            }
+            String clientName = generateRandomClientId();
+            admin.addClient(clientName);
+            clientSrcField.setText(clientName);
+            updateRoutingTable(routingTableArea);
         });
 
         // Action pour envoyer un message d'un client à un autre
@@ -174,6 +173,17 @@ public class AdminUI extends JFrame {
     public void addLog(String log) {
         logArea.append(log + "\n");
         logArea.setCaretPosition(logArea.getDocument().getLength());
+    }
+
+    private String generateRandomClientId() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            int index = random.nextInt(characters.length());
+            sb.append(characters.charAt(index));
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) {

@@ -7,7 +7,9 @@ public class ClientWindow extends JFrame {
     private final String clientName;
     private final JTextArea chatArea;
     private final JTextField messageField;
+    private final JTextField destField;
     private final Admin admin;
+    private String lastSender;  // Stocke le dernier expéditeur
 
     public ClientWindow(String clientName, Admin admin) {
         this.clientName = clientName;
@@ -21,14 +23,23 @@ public class ClientWindow extends JFrame {
         JScrollPane scrollPane = new JScrollPane(chatArea);
 
         messageField = new JTextField();
+        destField = new JTextField();
         JButton sendButton = new JButton("Envoyer");
 
         sendButton.addActionListener(e -> sendMessage());
         messageField.addActionListener(e -> sendMessage());
 
-        JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.add(messageField, BorderLayout.CENTER);
-        inputPanel.add(sendButton, BorderLayout.EAST);
+        JPanel inputPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        JPanel destPanel = new JPanel(new BorderLayout());
+        destPanel.add(new JLabel("Destinataire: "), BorderLayout.WEST);
+        destPanel.add(destField, BorderLayout.CENTER);
+        
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel.add(messageField, BorderLayout.CENTER);
+        messagePanel.add(sendButton, BorderLayout.EAST);
+
+        inputPanel.add(destPanel);
+        inputPanel.add(messagePanel);
 
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
@@ -40,16 +51,22 @@ public class ClientWindow extends JFrame {
 
     private void sendMessage() {
         String message = messageField.getText().trim();
-        if (!message.isEmpty()) {
-            chatArea.append("Moi: " + message + "\n");
+        String dest = destField.getText().trim();
+        if (!message.isEmpty() && !dest.isEmpty()) {
+            chatArea.append("Moi à " + dest + ": " + message + "\n");
             messageField.setText("");
             // Envoyer le message via l'admin
-            admin.sendMessageFromClientToClient(clientName, "ClientB", message);
+            admin.sendMessageFromClientToClient(clientName, dest, message);
+        } else if (message.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Veuillez entrer un message.");
+        } else if (dest.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Veuillez spécifier un destinataire.");
         }
     }
 
     public void receiveMessage(String from, String message) {
         chatArea.append(from + ": " + message + "\n");
+        destField.setText(from);  // Met l'expéditeur comme destinataire
     }
 
     public String getClientName() {

@@ -1,6 +1,6 @@
 package fr.octonet;
 
-public abstract class Trame {
+public abstract class Trame implements java.io.Serializable {
 	
 	private int type_message; 
 

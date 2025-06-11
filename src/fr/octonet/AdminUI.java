@@ -201,6 +201,25 @@ public class AdminUI extends JFrame {
         area.setText(sb.toString());
     }
 
+    public void updateRoutingTableDisplay() {
+        // Trouver le JTextArea de la table de routage
+        for (Component comp : getContentPane().getComponents()) {
+            if (comp instanceof JPanel) {
+                JPanel panel = (JPanel) comp;
+                for (Component subComp : panel.getComponents()) {
+                    if (subComp instanceof JScrollPane) {
+                        JScrollPane scrollPane = (JScrollPane) subComp;
+                        Component view = scrollPane.getViewport().getView();
+                        if (view instanceof JTextArea) {
+                            updateRoutingTable((JTextArea) view);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {

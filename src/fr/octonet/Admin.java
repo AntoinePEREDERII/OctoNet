@@ -5,6 +5,9 @@ import java.util.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.concurrent.*;
+import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
+import java.net.ConnectException;
 
 public class Admin {
     private final Map<String, Client> clients = new HashMap<>();
@@ -90,15 +93,36 @@ public class Admin {
         if (!remoteServers.contains(serverAddress)) {
             try {
                 String[] parts = serverAddress.split(":");
+                if (parts.length != 2) {
+                    System.err.println("Format d'adresse invalide. Utilisez le format ip:port");
+                    return false;
+                }
                 String host = parts[0];
-                try (Socket socket = new Socket(host, 12346)) {
-                    remoteServers.add(serverAddress);
-                    System.out.println("Serveur distant ajouté: " + serverAddress);
-                    // Échanger les tables de routage (dummy data pour l'exemple)
+                int port = Integer.parseInt(parts[1]);
+                
+                // Créer un socket avec timeout
+                Socket socket = new Socket();
+                socket.connect(new InetSocketAddress(host, port), 5000); // 5 secondes de timeout
+                
+                try {
+                    // Échanger les tables de routage
                     Trame_routage trame = new Trame_routage(2, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
                     serveur.sendTrameToServer(trame, serverAddress);
+                    remoteServers.add(serverAddress);
+                    System.out.println("Serveur distant ajouté: " + serverAddress);
                     return true;
+                } finally {
+                    socket.close();
                 }
+            } catch (NumberFormatException e) {
+                System.err.println("Port invalide dans l'adresse du serveur");
+                return false;
+            } catch (SocketTimeoutException e) {
+                System.err.println("Timeout lors de la connexion au serveur distant");
+                return false;
+            } catch (ConnectException e) {
+                System.err.println("Connexion refusée - Le serveur distant n'est pas accessible");
+                return false;
             } catch (Exception e) {
                 System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
                 return false;

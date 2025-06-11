@@ -3,6 +3,7 @@ package fr.octonet;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import javax.swing.SwingUtilities;
 
 public class Serveur {
     private final Admin admin;
@@ -176,9 +177,15 @@ public class Serveur {
             }
         }
         
-        // Mettre à jour l'affichage de la table de routage
+        // Mettre à jour l'affichage de la table de routage sur le thread EDT
         if (adminUI != null) {
-            adminUI.updateRoutingTable();
+            SwingUtilities.invokeLater(() -> {
+                adminUI.updateRoutingTable();
+                // Ajouter les nouveaux clients à la liste
+                for (String client : admin.getRoutingTable().keySet()) {
+                    adminUI.addClientToList(client);
+                }
+            });
         }
     }
 

@@ -6,6 +6,13 @@
             "name": "AdminUI",
             "request": "launch",
             "mainClass": "OctoNet/fr.octonet.AdminUI",
+            "projectName": "OctoNet_f6870634"
+        },
+        {
+            "type": "java",
+            "name": "AdminUI",
+            "request": "launch",
+            "mainClass": "OctoNet/fr.octonet.AdminUI",
             "projectName": "OctoNet"
         },
         {

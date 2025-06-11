@@ -213,13 +213,15 @@ public class AdminUI extends JFrame {
     }
 
     public void updateRoutingTable() {
-        if (routingTableArea != null) {
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
-                sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
+        SwingUtilities.invokeLater(() -> {
+            if (routingTableArea != null) {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
+                    sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
+                }
+                routingTableArea.setText(sb.toString());
             }
-            routingTableArea.setText(sb.toString());
-        }
+        });
     }
     public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);

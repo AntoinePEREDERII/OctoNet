@@ -161,21 +161,8 @@ public class Serveur {
             }
         }
         
-        // Envoyer notre table de routage en réponse
-        Trame_routage responseTrame = new Trame_routage(
-            2,
-            trame.getServeur_source(),
-            admin.getLocalIP() + ":" + getPort(),
-            new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
-            new ArrayList<>(),
-            new ArrayList<>(Collections.singletonList(new ArrayList<>(admin.getRoutingTable().keySet()))),
-            new ArrayList<>(Collections.singletonList(0))
-        );
-        
-        // Envoyer la réponse au serveur source
-        if (trame.getServeur_source() != null) {
-            sendTrameToServer(responseTrame, trame.getServeur_source());
-        }
+        // Ne pas envoyer de réponse automatiquement pour éviter les boucles infinies
+        // La réponse sera envoyée uniquement via le bouton dédié
     }
 
     public void sendTrameToServer(Trame trame, String serverAddress) {

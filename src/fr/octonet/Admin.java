@@ -84,9 +84,10 @@ public class Admin {
 
     public void addRemoteClient(String clientName, String serverAddress) {
         routingTable.put(clientName, serverAddress);
-        if (adminUI != null) {
-            adminUI.addClientToList(clientName);
-        }
+        // Ne pas ajouter les clients distants à la liste visible
+        // if (adminUI != null) {
+        //     adminUI.addClientToList(clientName);
+        // }
     }
 
     public boolean addRemoteServer(String serverAddress) {
@@ -205,6 +206,14 @@ public class Admin {
 
     public AdminUI getAdminUI() {
         return adminUI;
+    }
+
+    public List<String> getRemoteServers() {
+        return remoteServers;
+    }
+
+    public Serveur getServeur() {
+        return serveur;
     }
 }
 

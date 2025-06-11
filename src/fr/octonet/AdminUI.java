@@ -5,6 +5,8 @@ import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
@@ -41,7 +43,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(clientScrollPane, BorderLayout.WEST);
 
         // Panel pour les serveurs distants et les messages
-        JPanel controlPanel = new JPanel(new GridLayout(12, 1, 5, 5));
+        JPanel controlPanel = new JPanel(new GridLayout(13, 1, 5, 5));
 
         serverAddressField = new JTextField();
         controlPanel.add(new JLabel("Adresse du Serveur distant (ip:port):"));
@@ -49,6 +51,9 @@ public class AdminUI extends JFrame {
 
         JButton addServerButton = new JButton("Ajouter Serveur");
         controlPanel.add(addServerButton);
+
+        JButton sendRoutingTableButton = new JButton("Envoyer Table de Routage");
+        controlPanel.add(sendRoutingTableButton);
 
         JButton addClientButton = new JButton("Ajouter Client");
         controlPanel.add(addClientButton);
@@ -113,6 +118,25 @@ public class AdminUI extends JFrame {
                         addServerButton.setEnabled(true); // Réactive le bouton
                     });
                 }).start();
+            }
+        });
+
+        // Action pour envoyer la table de routage
+        sendRoutingTableButton.addActionListener(e -> {
+            for (String serverAddress : admin.getRemoteServers()) {
+                Trame_routage trame = new Trame_routage(
+                    2,
+                    serverAddress,
+                    admin.getLocalIP() + ":" + admin.getPortSrv(),
+                    new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + admin.getPortSrv())),
+                    new ArrayList<>(),
+                    new ArrayList<>(Collections.singletonList(new ArrayList<>(admin.getRoutingTable().keySet()))),
+                    new ArrayList<>(Collections.singletonList(0))
+                );
+                admin.getServeur().sendTrameToServer(trame, serverAddress);
+                if (admin != null && admin.getAdminUI() != null) {
+                    admin.getAdminUI().addLog("Table de routage envoyée à " + serverAddress);
+                }
             }
         });
 

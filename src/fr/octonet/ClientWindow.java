@@ -9,7 +9,6 @@ public class ClientWindow extends JFrame {
     private final JTextField messageField;
     private final JTextField destField;
     private final Admin admin;
-    private String lastSender;  // Stocke le dernier expéditeur
 
     public ClientWindow(String clientName, Admin admin) {
         this.clientName = clientName;

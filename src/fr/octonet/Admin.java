@@ -86,9 +86,8 @@ public class Admin {
         
         System.out.println("Client local ajouté: " + clientName + " sur " + localAddress);
     }
-
+    //mise a jour de la table de routage
     public void addRemoteClient(String clientName, String serverAddress) {
-        // Ne pas modifier l'adresse du serveur, la conserver telle quelle
         routingTable.put(clientName, serverAddress);
     }
 
@@ -105,6 +104,9 @@ public class Admin {
                     // Elle sera envoyée via le bouton dédié
                     remoteServers.add(host + ":" + this.getPortSrv()); // Stocker avec le portsrv
                     System.out.println("Serveur distant ajouté: " + host + ":" + this.getPortSrv());
+                    if (adminUI != null) {
+                        adminUI.addLog("Serveur distant ajouté: " + host + ":" + this.getPortSrv());
+                    }
                     return true;
                 } finally {
                     socket.close();
@@ -123,7 +125,7 @@ public class Admin {
         System.out.println("Serveur déja présent");
         return false; // déjà présent
     }
-
+    //mise a jour de la table de routage
     public void updateRoutingTable(String serializedTable) {
         String[] entries = serializedTable.split(";");
         for (String entry : entries) {

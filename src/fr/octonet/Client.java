@@ -11,13 +11,14 @@ public class Client {
     public Client(String name) {
         this.name = name;
     }
-
+    //inutile
+    /* 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
         this.name = "Client_" + System.currentTimeMillis();
     }
-
+*/
     public String getName() {
         return name;
     }
@@ -32,12 +33,12 @@ public class Client {
         Trame_message trame = new Trame_message(1, null, null, destClient, this.name, message);
         sendTrame(trame);
     }
-
+/* 
     public void sendMessage(String message) {
         // Pour la compatibilité avec l'ancien code
         sendMessage(null, message);
     }
-
+*/
     public void sendTrame(Trame trame) {
         try {
             // Ajouter un délai avant la tentative de connexion
@@ -54,7 +55,7 @@ public class Client {
             e.printStackTrace();
         }
     }
-
+/* 
     public Trame receiveTrame() {
         try {
             // Ajouter un délai avant la tentative de connexion
@@ -74,4 +75,5 @@ public class Client {
             return null;
         }
     }
+        */
 }

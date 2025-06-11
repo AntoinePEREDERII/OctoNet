@@ -69,7 +69,7 @@ public class Serveur {
             }
         }).start();
     }
-
+/*
     private void handleClient(Socket clientSocket) {
         try {
             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
@@ -90,7 +90,7 @@ public class Serveur {
             }
         }
     }
-
+ */
     private void handleServer(Socket socket) {
         try {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -180,8 +180,6 @@ public class Serveur {
         if (adminUI != null) {
             adminUI.updateRoutingTableDisplay();
         }
-        
-        // Ne pas envoyer de réponse automatique
     }
 
     public void sendTrameToServer(Trame trame, String serverAddress) {
@@ -202,7 +200,7 @@ public class Serveur {
     public int getPort() {
         return portServeur;
     }
-
+/*
     public void connectToRemoteServer(String serverAddress) {
         try {
             String[] parts = serverAddress.split(":");
@@ -215,7 +213,7 @@ public class Serveur {
             System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
         }
     }
-
+ */
     public static void main(String[] args) {
     }
 }

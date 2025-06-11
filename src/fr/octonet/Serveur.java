@@ -117,33 +117,6 @@ public class Serveur {
         // Récupérer l'adresse du serveur source
         String sourceServer = trame.getServeur_source();
         if (adminUI != null) adminUI.addLog("Table reçue du serveur : " + sourceServer);
-        
-        // Mettre à jour la table de routage avec les informations reçues
-        ArrayList<String> serveurs = trame.getServeurs();
-        ArrayList<ArrayList<String>> clients_serveurs = trame.getClients_serveurs();
-        
-        if (serveurs != null && clients_serveurs != null) {
-            for (int i = 0; i < serveurs.size(); i++) {
-                String serverAddress = serveurs.get(i);
-                ArrayList<String> clients = clients_serveurs.get(i);
-                
-                // Ajouter chaque client avec l'adresse du serveur correspondant
-                for (String client : clients) {
-                    // Ne pas ajouter si le client est déjà géré localement
-                    if (!admin.getRoutingTable().containsKey(client) || 
-                        !admin.getRoutingTable().get(client).equals(admin.getLocalIP() + ":" + getPort())) {
-                        admin.addRemoteClient(client, serverAddress);
-                    }
-                }
-            }
-        }
-        
-        // Mettre à jour l'affichage de la table de routage sur le thread EDT
-        if (admin.getAdminUI() != null) {
-            SwingUtilities.invokeLater(() -> {
-                adminUI.updateRoutingTable();
-            });
-        }
 
         // Vérifier si le serveur source est déjà dans notre table de routage
         boolean serverAlreadyKnown = false;
@@ -183,6 +156,33 @@ public class Serveur {
             if (admin.getAdminUI() != null) {
                 admin.getAdminUI().addLog("Serveur " + sourceServer + " déjà connu, pas d'envoi de table de routage");
             }
+        }
+        
+        // Mettre à jour la table de routage avec les informations reçues
+        ArrayList<String> serveurs = trame.getServeurs();
+        ArrayList<ArrayList<String>> clients_serveurs = trame.getClients_serveurs();
+        
+        if (serveurs != null && clients_serveurs != null) {
+            for (int i = 0; i < serveurs.size(); i++) {
+                String serverAddress = serveurs.get(i);
+                ArrayList<String> clients = clients_serveurs.get(i);
+                
+                // Ajouter chaque client avec l'adresse du serveur correspondant
+                for (String client : clients) {
+                    // Ne pas ajouter si le client est déjà géré localement
+                    if (!admin.getRoutingTable().containsKey(client) || 
+                        !admin.getRoutingTable().get(client).equals(admin.getLocalIP() + ":" + getPort())) {
+                        admin.addRemoteClient(client, serverAddress);
+                    }
+                }
+            }
+        }
+        
+        // Mettre à jour l'affichage de la table de routage sur le thread EDT
+        if (admin.getAdminUI() != null) {
+            SwingUtilities.invokeLater(() -> {
+                adminUI.updateRoutingTable();
+            });
         }
     }
 

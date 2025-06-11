@@ -105,8 +105,18 @@ public class Admin {
                 socket.connect(new InetSocketAddress(host, port), 5000); // 5 secondes de timeout
                 
                 try {
-                    // Échanger les tables de routage
-                    Trame_routage trame = new Trame_routage(2, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                    // Créer une trame de routage avec nos informations
+                    Trame_routage trame = new Trame_routage(
+                        2,
+                        serverAddress,
+                        localIP + ":" + serveur.getPort(),
+                        new ArrayList<>(Collections.singletonList(localIP + ":" + serveur.getPort())),
+                        new ArrayList<>(),
+                        new ArrayList<>(Collections.singletonList(new ArrayList<>(routingTable.keySet()))),
+                        new ArrayList<>(Collections.singletonList(0))
+                    );
+                    
+                    // Envoyer la trame de routage
                     serveur.sendTrameToServer(trame, serverAddress);
                     remoteServers.add(serverAddress);
                     System.out.println("Serveur distant ajouté: " + serverAddress);

@@ -124,15 +124,24 @@ public class AdminUI extends JFrame {
         // Action pour envoyer la table de routage
         sendRoutingTableButton.addActionListener(e -> {
             for (String serverAddress : admin.getRemoteServers()) {
+                // Créer une trame de routage avec uniquement nos clients locaux
+                ArrayList<String> localClients = new ArrayList<>();
+                for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
+                    if (entry.getValue().equals(admin.getLocalIP() + ":" + admin.getPortSrv())) {
+                        localClients.add(entry.getKey());
+                    }
+                }
+                
                 Trame_routage trame = new Trame_routage(
                     2,
                     serverAddress,
                     admin.getLocalIP() + ":" + admin.getPortSrv(),
                     new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + admin.getPortSrv())),
                     new ArrayList<>(),
-                    new ArrayList<>(Collections.singletonList(new ArrayList<>(admin.getRoutingTable().keySet()))),
+                    new ArrayList<>(Collections.singletonList(localClients)),
                     new ArrayList<>(Collections.singletonList(0))
                 );
+                
                 admin.getServeur().sendTrameToServer(trame, serverAddress);
                 if (admin != null && admin.getAdminUI() != null) {
                     admin.getAdminUI().addLog("Table de routage envoyée à " + serverAddress);

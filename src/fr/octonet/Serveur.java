@@ -168,13 +168,16 @@ public class Serveur {
                 
                 // Ajouter chaque client avec l'adresse du serveur correspondant
                 for (String client : clients) {
-                    admin.addRemoteClient(client, serverAddress);
+                    // Ne pas ajouter si le client est déjà géré localement
+                    if (!admin.getRoutingTable().containsKey(client) || 
+                        !admin.getRoutingTable().get(client).equals(admin.getLocalIP() + ":" + getPort())) {
+                        admin.addRemoteClient(client, serverAddress);
+                    }
                 }
             }
         }
         
-        // Ne pas envoyer de réponse automatiquement pour éviter les boucles infinies
-        // La réponse sera envoyée uniquement via le bouton dédié
+        // Ne pas envoyer de réponse automatique
     }
 
     public void sendTrameToServer(Trame trame, String serverAddress) {

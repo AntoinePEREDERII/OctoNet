@@ -83,11 +83,8 @@ public class Admin {
     }
 
     public void addRemoteClient(String clientName, String serverAddress) {
+        // Ne pas modifier l'adresse du serveur, la conserver telle quelle
         routingTable.put(clientName, serverAddress);
-        // Ne pas ajouter les clients distants à la liste visible
-        // if (adminUI != null) {
-        //     adminUI.addClientToList(clientName);
-        // }
     }
 
     public boolean addRemoteServer(String serverAddress) {
@@ -105,19 +102,8 @@ public class Admin {
                 socket.connect(new InetSocketAddress(host, 9090), 5000); // 5 secondes de timeout
                 
                 try {
-                    // Créer une trame de routage avec nos informations
-                    Trame_routage trame = new Trame_routage(
-                        2,
-                        host + ":9090", // Utiliser le port 9090 pour l'adresse du serveur
-                        localIP + ":" + serveur.getPort(),
-                        new ArrayList<>(Collections.singletonList(localIP + ":" + serveur.getPort())),
-                        new ArrayList<>(),
-                        new ArrayList<>(Collections.singletonList(new ArrayList<>(routingTable.keySet()))),
-                        new ArrayList<>(Collections.singletonList(0))
-                    );
-                    
-                    // Envoyer la trame de routage
-                    serveur.sendTrameToServer(trame, host + ":9090");
+                    // Ne pas envoyer la table de routage automatiquement
+                    // Elle sera envoyée via le bouton dédié
                     remoteServers.add(host + ":9090"); // Stocker avec le port 9090
                     System.out.println("Serveur distant ajouté: " + host + ":9090");
                     return true;

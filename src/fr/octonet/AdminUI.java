@@ -162,10 +162,10 @@ public class AdminUI extends JFrame {
         area.setText(sb.toString());
     }
 
-    public void addMessageToClientWindow(String clientName, String message) {
+    public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {
-            window.receiveMessage(clientName, message);
+            window.receiveMessage(from, clientName, message);
         }
     }
 

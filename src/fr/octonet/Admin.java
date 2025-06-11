@@ -87,32 +87,23 @@ public class Admin {
         routingTable.put(clientName, serverAddress);
     }
 
-    public boolean addRemoteServer(String serverAddress) {
-        if (!remoteServers.contains(serverAddress)) {
+    public boolean addRemoteServer(String host) {
+        if (!remoteServers.contains(host)) {
             try {
-                String[] parts = serverAddress.split(":");
-                if (parts.length != 2) {
-                    System.err.println("Format d'adresse invalide. Utilisez le format ip:port");
-                    return false;
-                }
-                String host = parts[0];
                 
-                // Utiliser le port 9090 pour la connexion au serveur distant
+                // Utiliser le portsrv pour la connexion au serveur distant
                 Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(host, 9090), 5000); // 5 secondes de timeout
+                socket.connect(new InetSocketAddress(host,  this.getPortSrv()), 5000); // 5 secondes de timeout
                 
                 try {
                     // Ne pas envoyer la table de routage automatiquement
                     // Elle sera envoyée via le bouton dédié
-                    remoteServers.add(host + ":9090"); // Stocker avec le port 9090
-                    System.out.println("Serveur distant ajouté: " + host + ":9090");
+                    remoteServers.add(host + ":" + this.getPortSrv()); // Stocker avec le portsrv
+                    System.out.println("Serveur distant ajouté: " + host + ":" + this.getPortSrv());
                     return true;
                 } finally {
                     socket.close();
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Port invalide dans l'adresse du serveur");
-                return false;
             } catch (SocketTimeoutException e) {
                 System.err.println("Timeout lors de la connexion au serveur distant");
                 return false;
@@ -124,6 +115,7 @@ public class Admin {
                 return false;
             }
         }
+        System.out.println("Serveur déja présent");
         return false; // déjà présent
     }
 

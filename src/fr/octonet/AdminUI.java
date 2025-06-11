@@ -30,7 +30,7 @@ public class AdminUI extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         // Affichage de l'IP et port du serveur local
-        serverInfoLabel = new JLabel("Serveur local : " + admin.getLocalIP() + ":" + admin.getPortListenCl());
+        serverInfoLabel = new JLabel("Serveur local : " + admin.getLocalIP() + ":" + admin.getPortSrv());
         mainPanel.add(serverInfoLabel, BorderLayout.NORTH);
 
         // Panel pour les clients
@@ -165,7 +165,7 @@ public class AdminUI extends JFrame {
     public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {
-            window.receiveMessage(from, clientName, message);
+            window.receiveMessage(from,clientName, message);
         }
     }
 

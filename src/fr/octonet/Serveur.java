@@ -162,7 +162,7 @@ public class Serveur {
     }
 
     public int getPort() {
-        return portClient;
+        return portServeur;
     }
 
     public void connectToRemoteServer(String serverAddress) {

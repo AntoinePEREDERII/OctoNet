@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.ConnectException;
+import javax.swing.SwingUtilities;
 
 public class Admin {
     private final Map<String, Client> clients = new HashMap<>();
@@ -88,7 +89,15 @@ public class Admin {
     }
     //mise a jour de la table de routage
     public void addRemoteClient(String clientName, String serverAddress) {
+        System.out.println("Ajout du client distant " + clientName + " via " + serverAddress);
         routingTable.put(clientName, serverAddress);
+        if (adminUI != null) {
+            SwingUtilities.invokeLater(() -> {
+                adminUI.addClientToList(clientName);
+                adminUI.updateRoutingTable();
+                adminUI.addLog("Client distant ajouté: " + clientName + " via " + serverAddress);
+            });
+        }
     }
 
     public boolean addRemoteServer(String host) {

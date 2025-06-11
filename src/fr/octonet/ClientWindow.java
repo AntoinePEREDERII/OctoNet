@@ -2,6 +2,8 @@ package fr.octonet;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ClientWindow extends JFrame {
     private final String clientName;
@@ -46,6 +48,17 @@ public class ClientWindow extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+
+        // Ajouter un WindowListener pour gérer la fermeture de la fenêtre
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Supprimer le client de la table de routage
+                admin.removeClient(clientName);
+                // Supprimer la fenêtre de la map des fenêtres
+                AdminUI.clientWindows.remove(clientName);
+            }
+        });
     }
 
     private void sendMessage() {

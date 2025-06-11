@@ -69,6 +69,21 @@ public class AdminUI extends JFrame {
 
         controlPanel.add(new JLabel("Message :"));
         messageField = new JTextField();
+        messageField.addActionListener(e -> {
+            String clientSrc = clientSrcField.getText();
+            String clientDest = clientDestField.getText();
+            String message = messageField.getText();
+            if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
+                admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
+                if (admin != null && admin.getAdminUI() != null) {
+                    admin.getAdminUI().addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
+                }
+                messageField.setText("");
+            } else {
+                JOptionPane.showMessageDialog(AdminUI.this,
+                        "Veuillez remplir tous les champs (source, destination, message).");
+            }
+        });
         controlPanel.add(messageField);
 
         JButton sendMessageButton = new JButton("Envoyer Message");
@@ -238,6 +253,10 @@ public class AdminUI extends JFrame {
             sb.append(characters.charAt(index));
         }
         return sb.toString();
+    }
+
+    public void removeClientFromList(String clientName) {
+        clientListModel.removeElement(clientName);
     }
 
     public static void main(String[] args) {

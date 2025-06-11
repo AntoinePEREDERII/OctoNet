@@ -201,6 +201,23 @@ public class Admin {
     public Serveur getServeur() {
         return serveur;
     }
+
+    public void removeClient(String clientName) {
+        // Supprimer le client de la table de routage
+        routingTable.remove(clientName);
+        
+        // Supprimer le client des clients locaux
+        clients.remove(clientName);
+        
+        // Mettre à jour l'interface
+        if (adminUI != null) {
+            adminUI.removeClientFromList(clientName);
+            adminUI.addLog("Client supprimé: " + clientName);
+            adminUI.updateRoutingTableDisplay();
+        }
+        
+        System.out.println("Client supprimé: " + clientName);
+    }
 }
 
 

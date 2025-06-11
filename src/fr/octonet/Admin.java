@@ -91,17 +91,12 @@ public class Admin {
             try {
                 String[] parts = serverAddress.split(":");
                 String host = parts[0];
-                // Le port n'est pas utilisé car on se connecte toujours au port 12346
                 try (Socket socket = new Socket(host, 12346)) {
                     remoteServers.add(serverAddress);
                     System.out.println("Serveur distant ajouté: " + serverAddress);
-                    
-                    // Échanger les tables de routage
-                    Trame trame = new Trame();
-                    trame.setType("ROUTING");
-                    trame.setData(serializeRoutingTable());
+                    // Échanger les tables de routage (dummy data pour l'exemple)
+                    Trame_routage trame = new Trame_routage(2, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
                     serveur.sendTrameToServer(trame, serverAddress);
-                    
                     return true;
                 }
             } catch (Exception e) {
@@ -110,14 +105,6 @@ public class Admin {
             }
         }
         return false; // déjà présent
-    }
-
-    private String serializeRoutingTable() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : routingTable.entrySet()) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
-        }
-        return sb.toString();
     }
 
     public void updateRoutingTable(String serializedTable) {
@@ -164,12 +151,7 @@ public class Admin {
             sendMessage(from, to, message);
             if (adminUI != null) adminUI.addLog("Message délivré localement à " + to);
         } else {
-            Trame trame = new Trame();
-            trame.setType("CLIENT");
-            trame.setClientNameSrc(from);
-            trame.setClientNameDest(to);
-            trame.setData(message);
-            trame.setServerIpDest(nextHop);
+            Trame_message trame = new Trame_message(1, null, null, to, from, message);
             serveur.sendTrameToServer(trame, nextHop);
             if (adminUI != null) adminUI.addLog("Message routé vers " + nextHop + " pour " + to);
         }

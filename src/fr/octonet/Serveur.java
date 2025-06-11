@@ -3,6 +3,9 @@ package fr.octonet;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import fr.octonet.Trame;
+import fr.octonet.Trame_message;
+import fr.octonet.Trame_routage;
 
 public class Serveur {
     private final Admin admin;
@@ -111,22 +114,19 @@ public class Serveur {
     }
 
     private void handleTrame(Trame trame, Socket socket) {
-        switch (trame.getType()) {
-            case "CLIENT":
-                handleClientTrame(trame);
-                break;
-            case "ROUTING":
-                handleRoutingTrame(trame);
-                break;
-            default:
-                System.err.println("Type de trame inconnu: " + trame.getType());
+        if (trame instanceof Trame_message) {
+            handleClientTrame((Trame_message) trame);
+        } else if (trame instanceof Trame_routage) {
+            handleRoutingTrame((Trame_routage) trame);
+        } else {
+            System.err.println("Type de trame inconnu: " + trame.getClass().getSimpleName());
         }
     }
 
-    private void handleClientTrame(Trame trame) {
-        String clientName = trame.getClientNameDest();
-        String message = trame.getData();
-        String from = trame.getClientNameSrc();
+    private void handleClientTrame(Trame_message trame) {
+        String clientName = trame.getClient_cible();
+        String message = trame.getDu();
+        String from = trame.getClient_source();
         String nextHop = admin.getRoutingTable().get(clientName);
         if (nextHop == null) {
             if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Destination inconnue dans la table de routage pour " + clientName);
@@ -141,11 +141,9 @@ public class Serveur {
         }
     }
 
-    private void handleRoutingTrame(Trame trame) {
-        String routingData = trame.getData();
-        admin.updateRoutingTable(routingData);
-        System.out.println("Table de routage mise à jour");
-        if (adminUI != null) adminUI.addLog("Table de routage mise à jour");
+    private void handleRoutingTrame(Trame_routage trame) {
+        System.out.println("Table de routage reçue (à traiter selon le format de Trame_routage)");
+        if (adminUI != null) adminUI.addLog("Table de routage reçue (à traiter)");
     }
 
     public void sendTrameToServer(Trame trame, String serverAddress) {
@@ -174,26 +172,12 @@ public class Serveur {
             int port = Integer.parseInt(parts[1]);
             try (Socket socket = new Socket(host, port);
                  ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-                Trame trame = new Trame();
-                trame.setType("ROUTING");
-                trame.setData(serializeRoutingTable(admin.getRoutingTable()));
-                out.writeObject(trame);
-                out.flush();
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de la connexion au serveur distant: " + e.getMessage());
         }
     }
 
-    private String serializeRoutingTable(Map<String, String> table) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : table.entrySet()) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
-        }
-        return sb.toString();
-    }
-
     public static void main(String[] args) {
-        Admin admin = new Admin();
     }
 }

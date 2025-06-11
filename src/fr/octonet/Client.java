@@ -28,9 +28,8 @@ public class Client {
     }
 
     public void sendMessage(String destClient, String message) {
-        Trame trame = new Trame(message);
-        trame.setClientNameSrc(this.name);
-        trame.setClientNameDest(destClient);
+        // type_message=1 pour message, serveur_cible et serveur_source peuvent être null ou this.name si besoin
+        Trame_message trame = new Trame_message(1, null, null, destClient, this.name, message);
         sendTrame(trame);
     }
 

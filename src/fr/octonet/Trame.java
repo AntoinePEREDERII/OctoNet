@@ -1,48 +1,35 @@
 package fr.octonet;
 
-import java.io.Serializable;
+public abstract class Trame {
+	
+	private int type_message; 
 
-public class Trame implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private String type; // "CLIENT", "SERVER", "ROUTING_TABLE", etc.
-    private String serverIpDest; // IP:port du serveur destinataire
-    private String clientNameSrc; // nom du client source (si concerné)
-    private String clientNameDest; // nom du client destinataire (si concerné)
-    private String data; // message, ou autre
-
-    public Trame() {
-        this.type = "DEFAULT";
-    }
-
-    public Trame(String message) {
-        this.type = "CLIENT";
-        this.data = message;
-    }
-
-    // Getters et setters
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
-
-    public String getServerIpDest() { return serverIpDest; }
-    public void setServerIpDest(String serverIpDest) { this.serverIpDest = serverIpDest; }
-
-    public String getClientNameSrc() { return clientNameSrc; }
-    public void setClientNameSrc(String clientNameSrc) { this.clientNameSrc = clientNameSrc; }
-
-    public String getClientNameDest() { return clientNameDest; }
-    public void setClientNameDest(String clientNameDest) { this.clientNameDest = clientNameDest; }
-
-    public String getData() { return data; }
-    public void setData(String data) { this.data = data; }
-
-    @Override
-    public String toString() {
-        return "Trame{" +
-                "type='" + type + '\'' +
-                ", serverIpDest='" + serverIpDest + '\'' +
-                ", clientNameSrc='" + clientNameSrc + '\'' +
-                ", clientNameDest='" + clientNameDest + '\'' +
-                ", data=" + data +
-                '}';
-    }
+	private String serveur_cible;
+	private String serveur_source;
+	
+	Trame(int type_message, String serveur_cible, String serveur_source){
+		this.type_message = type_message;
+		this.serveur_cible = serveur_cible;
+		this.serveur_source = serveur_source;
+	}
+	
+	public int getType_message() {
+		return type_message;
+	}
+	public void setType_message(int type_message) {
+		this.type_message = type_message;
+	}
+	public String getServeur_cible() {
+		return serveur_cible;
+	}
+	public void setServeur_cible(String serveur_cible) {
+		this.serveur_cible = serveur_cible;
+	}
+	public String getServeur_source() {
+		return serveur_source;
+	}
+	public void setServeur_source(String serveur_source) {
+		this.serveur_source = serveur_source;
+	}
+	
 }

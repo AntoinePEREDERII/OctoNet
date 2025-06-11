@@ -28,7 +28,10 @@ public class Admin {
         // Initialiser le serveur d'abord
         this.serveur = new Serveur(this);
         new Thread(() -> serveur.start()).start();
-        // Puis initialiser l'interface
+    }
+
+    public void initializeUI() {
+        // Initialiser l'interface après la création de l'instance Admin
         this.adminUI = new AdminUI(this);
         // Configurer l'interface dans le serveur
         this.serveur.setAdminUI(this.adminUI);
@@ -64,6 +67,7 @@ public class Admin {
         // Vérifier si le client existe déjà
         if (routingTable.containsKey(clientName)) {
             System.err.println("Le client " + clientName + " existe déjà");
+            if (adminUI != null) adminUI.addLog("Erreur: Le client " + clientName + " existe déjà");
             return;
         }
 
@@ -77,6 +81,7 @@ public class Admin {
         
         if (adminUI != null) {
             adminUI.addClientToList(clientName);
+            adminUI.addLog("Client local ajouté: " + clientName + " sur " + localAddress);
         }
         
         System.out.println("Client local ajouté: " + clientName + " sur " + localAddress);
@@ -148,7 +153,8 @@ public class Admin {
         if (client != null) {
             client.receiveMessage(from, message);
             if (adminUI != null) {
-                adminUI.addMessageToClientWindow(from,to,message);
+                adminUI.addMessageToClientWindow(from, to, message);
+                adminUI.addLog("Message reçu de " + from + ": " + message);
             }
         }
     }

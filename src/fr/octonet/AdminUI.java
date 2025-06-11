@@ -46,7 +46,7 @@ public class AdminUI extends JFrame {
         JPanel controlPanel = new JPanel(new GridLayout(13, 1, 5, 5));
 
         serverAddressField = new JTextField();
-        controlPanel.add(new JLabel("Adresse du Serveur distant (ip:port):"));
+        controlPanel.add(new JLabel("Adresse du Serveur distant (IP uniquement):"));
         controlPanel.add(serverAddressField);
 
         JButton addServerButton = new JButton("Ajouter Serveur");
@@ -83,12 +83,15 @@ public class AdminUI extends JFrame {
         routingScrollPane.setPreferredSize(new Dimension(220, 0));
         mainPanel.add(routingScrollPane, BorderLayout.EAST);
 
-        // Zone de log
+        // Zone de log dans un panneau séparé
+        JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.setBorder(BorderFactory.createTitledBorder("Logs"));
         logArea = new JTextArea(8, 40);
         logArea.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(logArea);
         logScrollPane.setPreferredSize(new Dimension(400, 120));
-        mainPanel.add(logScrollPane, BorderLayout.SOUTH);
+        logPanel.add(logScrollPane, BorderLayout.CENTER);
+        mainPanel.add(logPanel, BorderLayout.SOUTH);
 
         // Action pour ajouter un serveur distant
         addServerButton.addActionListener(e -> {
@@ -228,8 +231,10 @@ public class AdminUI extends JFrame {
     }
 
     public void addLog(String log) {
-        logArea.append(log + "\n");
-        logArea.setCaretPosition(logArea.getDocument().getLength());
+        SwingUtilities.invokeLater(() -> {
+            logArea.append(log + "\n");
+            logArea.setCaretPosition(logArea.getDocument().getLength());
+        });
     }
 
     private String generateRandomClientId() {
@@ -246,8 +251,8 @@ public class AdminUI extends JFrame {
     public static void main(String[] args) {
         try {
             Admin admin = new Admin();
-            AdminUI adminUI = new AdminUI(admin);
-            adminUI.setVisible(true);
+            admin.initializeUI();
+            admin.getAdminUI().setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -25,7 +25,7 @@ public class Serveur {
     }
 
     public void start() {
-        // Démarrer le serveur pour les clients
+        // Démarrer le serveur pour les clients NE SERT A RIEN NORMALEMENT
         new Thread(() -> {
             try {
                 serverSocketClient = new ServerSocket(portClient);

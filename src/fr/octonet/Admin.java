@@ -213,7 +213,7 @@ public class Admin {
         if (adminUI != null) {
             adminUI.removeClientFromList(clientName);
             adminUI.addLog("Client supprimé: " + clientName);
-            adminUI.updateRoutingTableDisplay();
+            adminUI.updateRoutingTable();
         }
         
         System.out.println("Client supprimé: " + clientName);

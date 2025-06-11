@@ -178,7 +178,7 @@ public class Serveur {
         
         // Mettre à jour l'affichage de la table de routage
         if (adminUI != null) {
-            adminUI.updateRoutingTableDisplay();
+            adminUI.updateRoutingTable();
         }
         
         // Ne pas envoyer de réponse automatique

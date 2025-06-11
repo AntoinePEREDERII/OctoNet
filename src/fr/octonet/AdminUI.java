@@ -133,7 +133,7 @@ public class AdminUI extends JFrame {
                             );
                         }
                         serverAddressField.setText("");
-                        updateRoutingTable(routingTableArea);
+                        updateRoutingTable();
                         addServerButton.setEnabled(true); // Réactive le bouton
                     });
                 }).start();
@@ -173,7 +173,7 @@ public class AdminUI extends JFrame {
             String clientName = generateRandomClientId();
             admin.addClient(clientName);
             clientSrcField.setText(clientName);
-            updateRoutingTable(routingTableArea);
+            updateRoutingTable();
         });
 
         // Action pour envoyer un message d'un client à un autre
@@ -212,15 +212,7 @@ public class AdminUI extends JFrame {
         window.setVisible(true);
     }
 
-    private void updateRoutingTable(JTextArea area) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
-            sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
-        }
-        area.setText(sb.toString());
-    }
-
-    public void updateRoutingTableDisplay() {
+    public void updateRoutingTable() {
         if (routingTableArea != null) {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
@@ -229,7 +221,6 @@ public class AdminUI extends JFrame {
             routingTableArea.setText(sb.toString());
         }
     }
-
     public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {

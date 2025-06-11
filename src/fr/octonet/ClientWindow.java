@@ -63,7 +63,7 @@ public class ClientWindow extends JFrame {
         }
     }
 
-    public void receiveMessage(String from, String message) {
+    public void receiveMessage(String from, String to, String message) {
         chatArea.append(from + ": " + message + "\n");
         destField.setText(from);  // Met l'expéditeur comme destinataire
     }

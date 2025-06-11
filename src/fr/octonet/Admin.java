@@ -149,7 +149,7 @@ public class Admin {
         if (client != null) {
             client.receiveMessage(from, message);
             if (adminUI != null) {
-                adminUI.addMessageToClientWindow(to, "De " + from + " : " + message);
+                adminUI.addMessageToClientWindow(from,to,message);
             }
         }
     }

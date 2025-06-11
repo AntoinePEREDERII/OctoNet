@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
-import java.net.Socket;
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
@@ -17,6 +16,7 @@ public class AdminUI extends JFrame {
     public static Map<String, ClientWindow> clientWindows;
     private JLabel serverInfoLabel;
     private JTextArea logArea;
+    private int id_client=0;
 
     public AdminUI(Admin admin) {
         super("Admin Interface");
@@ -112,11 +112,13 @@ public class AdminUI extends JFrame {
 
         // Action pour ajouter un client
         addClientButton.addActionListener(e -> {
-            String clientName = clientSrcField.getText();
+            //création du client name automatiquement en incrémentant l'ID
+            String clientName = "client"+id_client;
             if (!clientName.isEmpty()) {
                 admin.addClient(clientName);
                 clientSrcField.setText("");
                 updateRoutingTable(routingTableArea);
+                
             }
         });
 

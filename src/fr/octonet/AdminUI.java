@@ -19,6 +19,7 @@ public class AdminUI extends JFrame {
     public static Map<String, ClientWindow> clientWindows;
     private JLabel serverInfoLabel;
     private JTextArea logArea;
+    private JTextArea routingTableArea;
 
     public AdminUI(Admin admin) {
         super("Admin Interface");
@@ -77,7 +78,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(controlScrollPane, BorderLayout.CENTER);
 
         // Ajout d'un panneau pour la table de routage
-        JTextArea routingTableArea = new JTextArea(10, 20);
+        routingTableArea = new JTextArea(10, 20);
         routingTableArea.setEditable(false);
         JScrollPane routingScrollPane = new JScrollPane(routingTableArea);
         routingScrollPane.setPreferredSize(new Dimension(220, 0));
@@ -205,21 +206,12 @@ public class AdminUI extends JFrame {
     }
 
     public void updateRoutingTableDisplay() {
-        // Trouver le JTextArea de la table de routage
-        for (Component comp : getContentPane().getComponents()) {
-            if (comp instanceof JPanel) {
-                JPanel panel = (JPanel) comp;
-                for (Component subComp : panel.getComponents()) {
-                    if (subComp instanceof JScrollPane) {
-                        JScrollPane scrollPane = (JScrollPane) subComp;
-                        Component view = scrollPane.getViewport().getView();
-                        if (view instanceof JTextArea) {
-                            updateRoutingTable((JTextArea) view);
-                            break;
-                        }
-                    }
-                }
+        if (routingTableArea != null) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> entry : admin.getRoutingTable().entrySet()) {
+                sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
             }
+            routingTableArea.setText(sb.toString());
         }
     }
 

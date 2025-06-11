@@ -93,7 +93,6 @@ public class Admin {
         routingTable.put(clientName, serverAddress);
         if (adminUI != null) {
             SwingUtilities.invokeLater(() -> {
-                adminUI.addClientToList(clientName);
                 adminUI.updateRoutingTable();
                 adminUI.addLog("Client distant ajouté: " + clientName + " via " + serverAddress);
             });

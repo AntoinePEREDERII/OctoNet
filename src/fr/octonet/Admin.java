@@ -99,17 +99,16 @@ public class Admin {
                     return false;
                 }
                 String host = parts[0];
-                int port = Integer.parseInt(parts[1]);
                 
-                // Créer un socket avec timeout
+                // Utiliser le port 9090 pour la connexion au serveur distant
                 Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(host, port), 5000); // 5 secondes de timeout
+                socket.connect(new InetSocketAddress(host, 9090), 5000); // 5 secondes de timeout
                 
                 try {
                     // Créer une trame de routage avec nos informations
                     Trame_routage trame = new Trame_routage(
                         2,
-                        serverAddress,
+                        host + ":9090", // Utiliser le port 9090 pour l'adresse du serveur
                         localIP + ":" + serveur.getPort(),
                         new ArrayList<>(Collections.singletonList(localIP + ":" + serveur.getPort())),
                         new ArrayList<>(),
@@ -118,9 +117,9 @@ public class Admin {
                     );
                     
                     // Envoyer la trame de routage
-                    serveur.sendTrameToServer(trame, serverAddress);
-                    remoteServers.add(serverAddress);
-                    System.out.println("Serveur distant ajouté: " + serverAddress);
+                    serveur.sendTrameToServer(trame, host + ":9090");
+                    remoteServers.add(host + ":9090"); // Stocker avec le port 9090
+                    System.out.println("Serveur distant ajouté: " + host + ":9090");
                     return true;
                 } finally {
                     socket.close();
@@ -182,11 +181,14 @@ public class Admin {
             if (adminUI != null) adminUI.addLog("Destination inconnue dans la table de routage pour " + to);
             return;
         }
+
+        // Si le destinataire est local
         if (nextHop.equals(localIP + ":" + serveur.getPort())) {
             sendMessage(from, to, message);
             if (adminUI != null) adminUI.addLog("Message délivré localement à " + to);
         } else {
-            Trame_message trame = new Trame_message(1, null, null, to, from, message);
+            // Pour un client distant, envoyer via le serveur distant
+            Trame_message trame = new Trame_message(1, nextHop, localIP + ":" + serveur.getPort(), to, from, message);
             serveur.sendTrameToServer(trame, nextHop);
             if (adminUI != null) adminUI.addLog("Message routé vers " + nextHop + " pour " + to);
         }

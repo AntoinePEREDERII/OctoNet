@@ -128,15 +128,27 @@ public class Serveur {
         String message = trame.getDu();
         String from = trame.getClient_source();
         String nextHop = admin.getRoutingTable().get(clientName);
+        
         if (nextHop == null) {
             if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Destination inconnue dans la table de routage pour " + clientName);
             return;
         }
+
+        // Si le client est local
         if (nextHop.equals(admin.getLocalIP() + ":" + getPort())) {
             admin.sendMessage(from, clientName, message);
             if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Message délivré localement à " + clientName);
         } else {
-            sendTrameToServer(trame, nextHop);
+            // Pour un client distant, envoyer via le serveur distant
+            Trame_message forwardTrame = new Trame_message(
+                1,
+                nextHop,
+                admin.getLocalIP() + ":" + getPort(),
+                clientName,
+                from,
+                message
+            );
+            sendTrameToServer(forwardTrame, nextHop);
             if (admin.getAdminUI() != null) admin.getAdminUI().addLog("Message routé vers " + nextHop + " pour " + clientName);
         }
     }

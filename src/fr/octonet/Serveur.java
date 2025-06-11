@@ -14,6 +14,7 @@ public class Serveur {
     private ServerSocket serverSocketServeur;
     private AdminUI adminUI; // Référence à l'interface admin
 
+
     public Serveur(Admin admin) {
         this.admin = admin;
         this.portClient = 9091;
@@ -26,7 +27,7 @@ public class Serveur {
 
     public void start() {
         // Démarrer le serveur pour les clients NE SERT A RIEN NORMALEMENT
-        new Thread(() -> {
+        /*new Thread(() -> {
             try {
                 serverSocketClient = new ServerSocket(portClient);
                 System.out.println("Serveur démarré. En attente de connexion client sur le port " + portClient);
@@ -34,6 +35,7 @@ public class Serveur {
                     Socket clientSocket = serverSocketClient.accept();
                     clientSockets.add(clientSocket);
                     System.out.println("Nouveau client connecté: " + clientSocket.getInetAddress());
+                    System.out.println("GIGA PROUT SA MERE !!!!!!!!!!!!!!!");
                     if (adminUI != null) adminUI.addLog("Nouveau client connecté: " + clientSocket.getInetAddress());
                     new Thread(() -> handleClient(clientSocket)).start();
                 }
@@ -44,7 +46,7 @@ public class Serveur {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        }).start();*/
 
         // Démarrer le serveur pour les serveurs distants
         new Thread(() -> {

@@ -1,3 +1,6 @@
+// Classe abstraite de base pour toutes les trames du réseau
+// Une trame est l'unité de base de communication entre les serveurs
+// Elle contient les informations essentielles comme le type de message et les adresses source/destination
 package fr.octonet;
 
 import java.io.Serializable;

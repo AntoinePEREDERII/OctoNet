@@ -1,3 +1,6 @@
+// Classe représentant une trame de message entre clients
+// Utilisée pour transporter les messages entre les clients à travers le réseau
+// Contient les informations sur l'expéditeur, le destinataire et le contenu du message
 package fr.octonet;
 
 public class Trame_message extends Trame{

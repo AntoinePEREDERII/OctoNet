@@ -1,13 +1,18 @@
+// Classe principale gérant l'administration du réseau
+// Coordonne les interactions entre le serveur, les clients et l'interface utilisateur
+// Gère la table de routage et les connexions avec les serveurs distants
+// Permet d'ajouter/supprimer des clients et d'envoyer des messages
+// Détecte automatiquement l'adresse IP locale
 package fr.octonet;
 
-import java.net.Socket;
-import java.util.*;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.concurrent.*;
-import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 import javax.swing.SwingUtilities;
 
 public class Admin {
@@ -18,6 +23,7 @@ public class Admin {
     private AdminUI adminUI;
     private String localIP;
 
+    // Initialise le serveur et récupère l'IP locale
     public Admin() {
         try {
             // Obtenir l'adresse IP réelle de la machine
@@ -64,6 +70,7 @@ public class Admin {
         }
     }
 
+    // Ajoute un nouveau client local
     public void addClient(String clientName) {
         // Vérifier si le client existe déjà
         if (routingTable.containsKey(clientName)) {
@@ -87,7 +94,8 @@ public class Admin {
         
         System.out.println("Client local ajouté: " + clientName + " sur " + localAddress);
     }
-    //mise a jour de la table de routage
+
+    // Ajoute un client distant à la table de routage
     public void addRemoteClient(String clientName, String serverAddress) {
         System.out.println("Ajout du client distant " + clientName + " via " + serverAddress);
         routingTable.put(clientName, serverAddress);
@@ -99,6 +107,7 @@ public class Admin {
         }
     }
 
+    // Tente de se connecter à un serveur distant
     public boolean addRemoteServer(String host) {
         if (!remoteServers.contains(host)) {
             try {
@@ -133,7 +142,8 @@ public class Admin {
         System.out.println("Serveur déja présent");
         return false; // déjà présent
     }
-    //mise a jour de la table de routage
+
+    // Met à jour la table de routage avec les infos reçues
     public void updateRoutingTable(String serializedTable) {
         String[] entries = serializedTable.split(";");
         for (String entry : entries) {
@@ -169,6 +179,7 @@ public class Admin {
         }
     }
 
+    // Envoie un message entre deux clients
     public void sendMessageFromClientToClient(String from, String to, String message) {
         String nextHop = routingTable.get(to);
         if (nextHop == null) {
@@ -212,6 +223,7 @@ public class Admin {
         return serveur;
     }
 
+    // Supprime un client du réseau
     public void removeClient(String clientName) {
         // Supprimer le client de la table de routage
         routingTable.remove(clientName);

@@ -1,12 +1,21 @@
+// Interface graphique pour l'administrateur du réseau
+// Permet de :
+// - Voir la liste des clients connectés
+// - Ajouter des serveurs distants
+// - Envoyer la table de routage
+// - Créer de nouveaux clients
+// - Envoyer des messages entre clients
+// - Voir les logs et la table de routage
+// - Gérer les fenêtres des clients
 package fr.octonet;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import javax.swing.*;
 
 public class AdminUI extends JFrame {
     private DefaultListModel<String> clientListModel;
@@ -196,6 +205,7 @@ public class AdminUI extends JFrame {
         add(mainPanel);
     }
 
+    // Ajoute un client à la liste et crée sa fenêtre
     public void addClientToList(String clientName) {
         if (!clientListModel.contains(clientName)) {
             clientListModel.addElement(clientName);
@@ -212,6 +222,7 @@ public class AdminUI extends JFrame {
         window.setVisible(true);
     }
 
+    // Met à jour l'affichage de la table de routage
     public void updateRoutingTable() {
         SwingUtilities.invokeLater(() -> {
             if (routingTableArea != null) {
@@ -223,6 +234,8 @@ public class AdminUI extends JFrame {
             }
         });
     }
+
+    // Ajoute un message dans la fenêtre d'un client
     public void addMessageToClientWindow(String from, String clientName, String message) {
         ClientWindow window = clientWindows.get(clientName);
         if (window != null) {
@@ -230,6 +243,7 @@ public class AdminUI extends JFrame {
         }
     }
 
+    // Ajoute un message dans la zone de log
     public void addLog(String log) {
         SwingUtilities.invokeLater(() -> {
             logArea.append(log + "\n");
@@ -237,6 +251,7 @@ public class AdminUI extends JFrame {
         });
     }
 
+    // Génère un ID aléatoire pour un nouveau client
     private String generateRandomClientId() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
@@ -248,6 +263,7 @@ public class AdminUI extends JFrame {
         return sb.toString();
     }
 
+    // Supprime un client de la liste
     public void removeClientFromList(String clientName) {
         clientListModel.removeElement(clientName);
     }

@@ -1,3 +1,6 @@
+// Point d'entrée de l'application
+// Initialise l'interface administrateur et le serveur
+// Lance l'application dans le thread EDT (Event Dispatch Thread) de Swing
 package fr.octonet;
 
 import javax.swing.SwingUtilities;

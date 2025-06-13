@@ -1,3 +1,6 @@
+// Classe représentant une trame de routage entre serveurs
+// Utilisée pour échanger les tables de routage entre les serveurs
+// Permet de maintenir à jour la connaissance du réseau (serveurs, clients, distances)
 package fr.octonet;
 
 import java.net.Inet4Address;

@@ -1,9 +1,11 @@
 package fr.octonet;
 
-public abstract class Trame implements java.io.Serializable {
-	
-	private int type_message; 
+import java.io.Serializable;
 
+public abstract class Trame implements Serializable {
+	
+	private static final long serialVersionUID = -484492464833561910L; //Nécessaire de tous avoir le même UID pour bien passer de notre objet aux bits envoyés et inversement.
+	private int type_message; 
 	private String serveur_cible;
 	private String serveur_source;
 	

@@ -81,7 +81,7 @@ public class AdminUI extends JFrame {
 
         controlPanel.add(new JLabel("Message :"));
         messageField = new JTextField();
-        messageField.addActionListener(e -> {
+        messageField.addActionListener(_ -> {
             String clientSrc = clientSrcField.getText();
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
@@ -122,7 +122,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(logPanel, BorderLayout.SOUTH);
 
         // Action pour ajouter un serveur distant
-        addServerButton.addActionListener(e -> {
+        addServerButton.addActionListener(_ -> {
             String serverAddress = serverAddressField.getText();
             if (!serverAddress.isEmpty()) {
                 addServerButton.setEnabled(false); // Désactive le bouton pendant la connexion
@@ -153,7 +153,7 @@ public class AdminUI extends JFrame {
         });
 
         // Action pour envoyer la table de routage
-        sendRoutingTableButton.addActionListener(e -> {
+        sendRoutingTableButton.addActionListener(_ -> {
             for (String serverAddress : admin.getRemoteServers()) {
                 // Créer une trame de routage avec uniquement nos clients locaux
                 ArrayList<String> localClients = new ArrayList<>();
@@ -180,7 +180,7 @@ public class AdminUI extends JFrame {
         });
 
         // Action pour ajouter un client
-        addClientButton.addActionListener(e -> {
+        addClientButton.addActionListener(_ -> {
             String clientName = generateRandomClientId();
             admin.addClient(clientName);
             clientSrcField.setText(clientName);
@@ -188,7 +188,7 @@ public class AdminUI extends JFrame {
         });
 
         // Action pour envoyer un message d'un client à un autre
-        sendMessageButton.addActionListener(e -> {
+        sendMessageButton.addActionListener(_ -> {
             String clientSrc = clientSrcField.getText();
             String clientDest = clientDestField.getText();
             String message = messageField.getText();

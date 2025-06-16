@@ -19,14 +19,7 @@ public class Client {
     public Client(String name) {
         this.name = name;
     }
-    //inutile
-    /* 
-    public Client(String serverAddress, int serverPort) {
-        this.serverAddress = serverAddress;
-        this.serverPort = serverPort;
-        this.name = "Client_" + System.currentTimeMillis();
-    }
-*/
+
     public String getName() {
         return name;
     }
@@ -43,12 +36,7 @@ public class Client {
         Trame_message trame = new Trame_message(1, null, null, destClient, this.name, message);
         sendTrame(trame);
     }
-/* 
-    public void sendMessage(String message) {
-        // Pour la compatibilité avec l'ancien code
-        sendMessage(null, message);
-    }
-*/
+
     // Envoie une trame au serveur
     public void sendTrame(Trame trame) {
         try {
@@ -66,25 +54,4 @@ public class Client {
             e.printStackTrace();
         }
     }
-/* 
-    public Trame receiveTrame() {
-        try {
-            // Ajouter un délai avant la tentative de connexion
-            Thread.sleep(100);
-            
-            Socket socket = new Socket(serverAddress, serverPort);
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            Trame trame = (Trame) in.readObject();
-            in.close();
-            socket.close();
-            return trame;
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Erreur de réception pour le client " + name + ": " + e.getMessage());
-            return null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-        */
 }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Trame_routage extends Trame {
 	
-	private static final long serialVersionUID = -484492464833561911L;
+	private static final long serialVersionUID = -484492464833561910L;
 	private final ArrayList<String> serveurs;
 	private ArrayList<Inet4Address> passerelles;
 	private final ArrayList<ArrayList<String>> clients_serveurs;	

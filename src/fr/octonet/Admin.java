@@ -8,7 +8,9 @@ package fr.octonet;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.*;
 import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 import java.net.Socket;
 import java.net.ConnectException;
@@ -17,7 +19,6 @@ import java.net.NetworkInterface;
 import java.util.concurrent.*;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
-import javax.swing.SwingUtilities;
 
 import common.Trame;
 import common.Trame_message;

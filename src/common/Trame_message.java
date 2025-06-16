@@ -2,7 +2,7 @@ package common;
 
 public class Trame_message extends Trame{
 	
-	private static final long serialVersionUID = -484492464833561912L;
+	private static final long serialVersionUID = -484492464833561910L;
 	private final String client_cible;
 	private final String client_source;
 	private final String du;

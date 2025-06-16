@@ -1,3 +1,8 @@
+// Classe gérant le serveur de communication
+// Gère les connexions avec les clients et les autres serveurs
+// Traite les trames de message et de routage
+// Maintient la table de routage à jour en communiquant avec les autres serveurs
+// Utilise deux ports : un pour les clients (9091) et un pour les serveurs (9081)
 package fr.octonet;
 
 import java.io.*;
@@ -25,6 +30,7 @@ public class Serveur {
         this.adminUI = adminUI;
     }
 
+    // Démarre les serveurs pour clients et serveurs distants
     public void start() {
         // Démarrer le serveur pour les serveurs distants
         new Thread(() -> {
@@ -48,6 +54,7 @@ public class Serveur {
         }).start();
     }
 
+    // Gère la communication avec un serveur distant
     private void handleServer(Socket socket) {
         try {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -69,6 +76,7 @@ public class Serveur {
         }
     }
 
+    // Traite les différents types de trames reçues
     private void handleTrame(Trame trame, Socket socket) {
         if (trame instanceof Trame_message) {
             handleClientTrame((Trame_message) trame);
@@ -79,6 +87,7 @@ public class Serveur {
         }
     }
 
+    // Traite une trame de message entre clients
     private void handleClientTrame(Trame_message trame) {
         String clientName = trame.getClient_cible();
         String message = trame.getDu();
@@ -109,6 +118,7 @@ public class Serveur {
         }
     }
 
+    // Traite une trame de routage entre serveurs
     private void handleRoutingTrame(Trame_routage trame) {
         System.out.println("Table de routage reçue");
         if (adminUI != null) adminUI.addLog("Table de routage reçue");
@@ -184,6 +194,7 @@ public class Serveur {
         }
     }
 
+    // Envoie une trame à un serveur distant
     public void sendTrameToServer(Trame trame, String serverAddress) {
         try {
             String[] parts = serverAddress.split(":");

@@ -1,9 +1,13 @@
+// Interface graphique pour un client
+// Permet à l'utilisateur d'envoyer et recevoir des messages
+// Gère l'affichage des messages et l'interaction utilisateur
+// Se ferme automatiquement quand l'utilisateur ferme la fenêtre
 package fr.octonet;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.*;
 
 public class ClientWindow extends JFrame {
     private final String clientName;
@@ -61,6 +65,7 @@ public class ClientWindow extends JFrame {
         });
     }
 
+    // Envoie un message à un autre client
     private void sendMessage() {
         String message = messageField.getText().trim();
         String dest = destField.getText().trim();
@@ -76,6 +81,7 @@ public class ClientWindow extends JFrame {
         }
     }
 
+    // Reçoit et affiche un message
     public void receiveMessage(String from, String to, String message) {
         chatArea.append(from + ": " + message + "\n");
         destField.setText(from);  // Met l'expéditeur comme destinataire

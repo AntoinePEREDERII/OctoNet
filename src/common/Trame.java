@@ -9,7 +9,7 @@ public abstract class Trame implements Serializable {
 	private String serveur_cible;
 	private String serveur_source;
 	
-	Trame(int type_message, String serveur_cible, String serveur_source){
+	public Trame(int type_message, String serveur_cible, String serveur_source) {
 		this.type_message = type_message;
 		this.serveur_cible = serveur_cible;
 		this.serveur_source = serveur_source;

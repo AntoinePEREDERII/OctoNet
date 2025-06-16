@@ -1,7 +1,11 @@
 package fr.octonet;
 
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
+import java.util.*;
+
+import common.Trame;
+import common.Trame_message;
 
 public class Client {
     private String serverAddress;

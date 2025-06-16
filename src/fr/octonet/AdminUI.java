@@ -1,6 +1,9 @@
 package fr.octonet;
 
 import javax.swing.*;
+
+import common.Trame_routage;
+
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -156,7 +159,6 @@ public class AdminUI extends JFrame {
                     serverAddress,
                     admin.getLocalIP() + ":" + admin.getPortSrv(),
                     new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + admin.getPortSrv())),
-                    new ArrayList<>(),
                     new ArrayList<>(Collections.singletonList(localClients)),
                     new ArrayList<>(Collections.singletonList(0))
                 );

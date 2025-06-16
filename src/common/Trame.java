@@ -1,9 +1,11 @@
-package fr.octonet;
+package common;
 
-public abstract class Trame implements java.io.Serializable {
+import java.io.Serializable;
+
+public abstract class Trame implements Serializable {
 	
+	private static final long serialVersionUID = -484492464833561910L;
 	private int type_message; 
-
 	private String serveur_cible;
 	private String serveur_source;
 	

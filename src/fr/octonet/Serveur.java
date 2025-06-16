@@ -5,20 +5,19 @@ import java.net.*;
 import java.util.*;
 import javax.swing.SwingUtilities;
 
+import common.Trame;
+import common.Trame_message;
+import common.Trame_routage;
+
 public class Serveur {
     private final Admin admin;
-    private final int portClient;
     private final int portServeur;
-    private final Set<Socket> clientSockets = new HashSet<>();
     private final Set<Socket> remoteServerSockets = new HashSet<>();
-    private ServerSocket serverSocketClient;
     private ServerSocket serverSocketServeur;
-    private AdminUI adminUI; // Référence à l'interface admin
-
+    private AdminUI adminUI;
 
     public Serveur(Admin admin) {
         this.admin = admin;
-        this.portClient = 9091;
         this.portServeur = 9081;
     }
 
@@ -145,10 +144,9 @@ public class Serveur {
                 2,
                 sourceServer,
                 admin.getLocalIP() + ":" + getPort(),
-                new ArrayList<>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
-                new ArrayList<>(),
-                new ArrayList<>(Collections.singletonList(localClients)),
-                new ArrayList<>(Collections.singletonList(0))
+                new ArrayList<String>(Collections.singletonList(admin.getLocalIP() + ":" + getPort())),
+                new ArrayList<ArrayList<String>>(Collections.singletonList(localClients)),
+                new ArrayList<Integer>(Collections.singletonList(0))
             );
             
             sendTrameToServer(responseTrame, sourceServer);

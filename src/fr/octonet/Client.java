@@ -6,7 +6,6 @@ package fr.octonet;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 import common.Trame;
 import common.Trame_message;

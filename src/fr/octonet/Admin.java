@@ -5,24 +5,19 @@
 // Détecte automatiquement l'adresse IP locale
 package fr.octonet;
 
-import java.io.*;
-import java.net.*;
+
 import java.util.*;
 import java.util.concurrent.*;
-import javax.swing.*;
 import javax.swing.SwingUtilities;
 
 import java.net.Socket;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.concurrent.*;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 
-import common.Trame;
 import common.Trame_message;
-import common.Trame_routage;
 
 public class Admin {
     private final Map<String, Client> clients = new HashMap<>();

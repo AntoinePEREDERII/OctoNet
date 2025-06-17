@@ -41,13 +41,6 @@ public class Admin {
         new Thread(() -> serveur.start()).start();
     }
 
-    public void initializeUI() {
-        // Initialiser l'interface après la création de l'instance Admin
-        this.adminUI = new AdminUI(this);
-        // Configurer l'interface dans le serveur
-        this.serveur.setAdminUI(this.adminUI);
-    }
-
     public String getLocalIP() {
         try {
             // Essayer d'obtenir l'adresse IP non-loopback

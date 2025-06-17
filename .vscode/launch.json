@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "OctoNet/fr.octonet.Main",
+            "projectName": "OctoNet-1_6e3b2708"
+        },
+        {
+            "type": "java",
             "name": "AdminUI",
             "request": "launch",
             "mainClass": "OctoNet/fr.octonet.AdminUI",

@@ -81,15 +81,13 @@ public class AdminUI extends JFrame {
 
         controlPanel.add(new JLabel("Message :"));
         messageField = new JTextField();
-        messageField.addActionListener(_ -> {
+        messageField.addActionListener(event -> {
             String clientSrc = clientSrcField.getText();
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
             if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
                 admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
-                if (admin != null && admin.getAdminUI() != null) {
-                    admin.getAdminUI().addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
-                }
+                addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
                 messageField.setText("");
             } else {
                 JOptionPane.showMessageDialog(AdminUI.this,
@@ -122,7 +120,7 @@ public class AdminUI extends JFrame {
         mainPanel.add(logPanel, BorderLayout.SOUTH);
 
         // Action pour ajouter un serveur distant
-        addServerButton.addActionListener(_ -> {
+        addServerButton.addActionListener(event -> {
             String serverAddress = serverAddressField.getText();
             if (!serverAddress.isEmpty()) {
                 addServerButton.setEnabled(false); // Désactive le bouton pendant la connexion
@@ -153,7 +151,7 @@ public class AdminUI extends JFrame {
         });
 
         // Action pour envoyer la table de routage
-        sendRoutingTableButton.addActionListener(_ -> {
+        sendRoutingTableButton.addActionListener(event -> {
             for (String serverAddress : admin.getRemoteServers()) {
                 // Créer une trame de routage avec uniquement nos clients locaux
                 ArrayList<String> localClients = new ArrayList<>();
@@ -173,14 +171,12 @@ public class AdminUI extends JFrame {
                 );
                 
                 admin.getServeur().sendTrameToServer(trame, serverAddress);
-                if (admin != null && admin.getAdminUI() != null) {
-                    admin.getAdminUI().addLog("Table de routage envoyée à " + serverAddress);
-                }
+                addLog("Table de routage envoyée à " + serverAddress);
             }
         });
 
         // Action pour ajouter un client
-        addClientButton.addActionListener(_ -> {
+        addClientButton.addActionListener(event -> {
             String clientName = generateRandomClientId();
             admin.addClient(clientName);
             clientSrcField.setText(clientName);
@@ -188,15 +184,13 @@ public class AdminUI extends JFrame {
         });
 
         // Action pour envoyer un message d'un client à un autre
-        sendMessageButton.addActionListener(_ -> {
+        sendMessageButton.addActionListener(event -> {
             String clientSrc = clientSrcField.getText();
             String clientDest = clientDestField.getText();
             String message = messageField.getText();
             if (!clientSrc.isEmpty() && !clientDest.isEmpty() && !message.isEmpty()) {
                 admin.sendMessageFromClientToClient(clientSrc, clientDest, message);
-                if (admin != null && admin.getAdminUI() != null) {
-                    admin.getAdminUI().addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
-                }
+                addLog("Demande d'envoi de " + clientSrc + " à " + clientDest + " : " + message);
                 messageField.setText("");
             } else {
                 JOptionPane.showMessageDialog(AdminUI.this,
@@ -268,15 +262,5 @@ public class AdminUI extends JFrame {
     // Supprime un client de la liste
     public void removeClientFromList(String clientName) {
         clientListModel.removeElement(clientName);
-    }
-
-    public static void main(String[] args) {
-        try {
-            Admin admin = new Admin();
-            admin.initializeUI();
-            admin.getAdminUI().setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

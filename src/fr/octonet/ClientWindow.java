@@ -31,8 +31,8 @@ public class ClientWindow extends JFrame {
         destField = new JTextField();
         JButton sendButton = new JButton("Envoyer");
 
-        sendButton.addActionListener(_ -> sendMessage());
-        messageField.addActionListener(_ -> sendMessage());
+        sendButton.addActionListener(event -> sendMessage());
+        messageField.addActionListener(event -> sendMessage());
 
         JPanel inputPanel = new JPanel(new GridLayout(2, 1, 5, 5));
         JPanel destPanel = new JPanel(new BorderLayout());

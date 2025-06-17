@@ -21,30 +21,32 @@ public class CompressionUtil {
             return "";
         }
 
-        List<DictionaryEntry> dictionary = new ArrayList<>();
+        Map<String, Integer> dictionary = new HashMap<>();
+        dictionary.put("", 0); // Index 0 est une chaîne vide
         StringBuilder compressed = new StringBuilder();
-        String current = "";
+        StringBuilder current = new StringBuilder();
+        int nextIndex = 1;
         
         for (int i = 0; i < input.length(); i++) {
-            current += input.charAt(i);
-            int index = findInDictionary(dictionary, current);
+            current.append(input.charAt(i));
+            String currentStr = current.toString();
             
-            if (index == -1) {
+            if (!dictionary.containsKey(currentStr)) {
                 // Ajouter au dictionnaire
-                String prefix = current.substring(0, current.length() - 1);
-                int prefixIndex = findInDictionary(dictionary, prefix);
-                char nextChar = current.charAt(current.length() - 1);
+                String prefix = currentStr.substring(0, currentStr.length() - 1);
+                int prefixIndex = dictionary.get(prefix);
+                char nextChar = currentStr.charAt(currentStr.length() - 1);
                 
-                dictionary.add(new DictionaryEntry(prefixIndex, nextChar));
                 compressed.append(prefixIndex).append(nextChar);
-                current = "";
+                dictionary.put(currentStr, nextIndex++);
+                current = new StringBuilder();
             }
         }
         
         // Gérer le dernier caractère si nécessaire
-        if (!current.isEmpty()) {
-            int index = findInDictionary(dictionary, current);
-            compressed.append(index);
+        if (current.length() > 0) {
+            String currentStr = current.toString();
+            compressed.append(dictionary.get(currentStr));
         }
         
         return compressed.toString();
@@ -62,26 +64,39 @@ public class CompressionUtil {
         StringBuilder decompressed = new StringBuilder();
         int i = 0;
         
-        while (i < compressed.length()) {
-            // Lire l'index
-            StringBuilder indexStr = new StringBuilder();
-            while (i < compressed.length() && Character.isDigit(compressed.charAt(i))) {
-                indexStr.append(compressed.charAt(i));
-                i++;
+        try {
+            while (i < compressed.length()) {
+                // Lire l'index
+                StringBuilder indexStr = new StringBuilder();
+                while (i < compressed.length() && Character.isDigit(compressed.charAt(i))) {
+                    indexStr.append(compressed.charAt(i));
+                    i++;
+                }
+                
+                if (indexStr.length() == 0) {
+                    throw new IllegalArgumentException("Format de compression invalide: index manquant");
+                }
+                
+                int index = Integer.parseInt(indexStr.toString());
+                if (index >= dictionary.size()) {
+                    throw new IllegalArgumentException("Index invalide dans le message compressé");
+                }
+                
+                String entry = dictionary.get(index);
+                
+                // Lire le caractère suivant s'il existe
+                if (i < compressed.length()) {
+                    char nextChar = compressed.charAt(i);
+                    entry += nextChar;
+                    i++;
+                }
+                
+                dictionary.add(entry);
+                decompressed.append(entry);
             }
-            
-            int index = Integer.parseInt(indexStr.toString());
-            String entry = dictionary.get(index);
-            
-            // Lire le caractère suivant s'il existe
-            if (i < compressed.length()) {
-                char nextChar = compressed.charAt(i);
-                entry += nextChar;
-                i++;
-            }
-            
-            dictionary.add(entry);
-            decompressed.append(entry);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la décompression: " + e.getMessage());
+            return compressed; // Retourner le message original en cas d'erreur
         }
         
         return decompressed.toString();
@@ -89,6 +104,10 @@ public class CompressionUtil {
     
     // Calcule le bit de parité pour une chaîne
     public static boolean calculateParity(String data) {
+        if (data == null || data.isEmpty()) {
+            return false;
+        }
+        
         int ones = 0;
         for (char c : data.toCharArray()) {
             ones += Integer.bitCount(c);
@@ -98,7 +117,21 @@ public class CompressionUtil {
     
     // Vérifie si les données sont corrompues en utilisant le bit de parité
     public static boolean isDataCorrupted(String data, boolean expectedParity) {
-        return calculateParity(data) != expectedParity;
+        if (data == null || data.isEmpty()) {
+            return false;
+        }
+        
+        try {
+            // Le dernier caractère est le bit de parité
+            String message = data.substring(0, data.length() - 1);
+            boolean receivedParity = data.charAt(data.length() - 1) == '1';
+            boolean calculatedParity = calculateParity(message);
+            
+            return receivedParity != calculatedParity;
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la vérification de parité: " + e.getMessage());
+            return true; // Considérer comme corrompu en cas d'erreur
+        }
     }
     
     // Trouve une chaîne dans le dictionnaire

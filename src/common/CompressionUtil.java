@@ -37,7 +37,8 @@ public class CompressionUtil {
                 int prefixIndex = dictionary.get(prefix);
                 char nextChar = currentStr.charAt(currentStr.length() - 1);
                 
-                compressed.append(prefixIndex).append(nextChar);
+                // Forcer la compression en ajoutant un préfixe spécial
+                compressed.append("C").append(prefixIndex).append(nextChar);
                 dictionary.put(currentStr, nextIndex++);
                 current = new StringBuilder();
             }
@@ -46,7 +47,7 @@ public class CompressionUtil {
         // Gérer le dernier caractère si nécessaire
         if (current.length() > 0) {
             String currentStr = current.toString();
-            compressed.append(dictionary.get(currentStr));
+            compressed.append("C").append(dictionary.get(currentStr));
         }
         
         return compressed.toString();
@@ -66,6 +67,12 @@ public class CompressionUtil {
         
         try {
             while (i < compressed.length()) {
+                // Vérifier le préfixe de compression
+                if (compressed.charAt(i) != 'C') {
+                    throw new IllegalArgumentException("Format de compression invalide: préfixe manquant");
+                }
+                i++;
+                
                 // Lire l'index
                 StringBuilder indexStr = new StringBuilder();
                 while (i < compressed.length() && Character.isDigit(compressed.charAt(i))) {

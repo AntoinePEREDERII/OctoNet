@@ -43,12 +43,7 @@ public class Client {
 
             // Décompresser le message
             String decompressedMessage = CompressionUtil.decompressLZ78(messageWithoutParity);
-            if (decompressedMessage.equals(messageWithoutParity)) {
-                // Si la décompression échoue, utiliser le message original
-                System.out.println("Message reçu de " + from + ": " + messageWithoutParity);
-            } else {
-                System.out.println("Message reçu de " + from + ": " + decompressedMessage);
-            }
+            System.out.println("Message reçu de " + from + ": " + decompressedMessage);
         } catch (Exception e) {
             System.err.println("Erreur lors du traitement du message de " + from + ": " + e.getMessage());
         }
@@ -62,11 +57,8 @@ public class Client {
         }
 
         try {
-            // Compresser le message avec LZ78
+            // Forcer la compression pour tous les messages
             String compressedMessage = CompressionUtil.compressLZ78(message);
-            if (compressedMessage.isEmpty()) {
-                compressedMessage = message; // Utiliser le message original si la compression échoue
-            }
             
             // Ajouter le bit de parité
             boolean parityBit = CompressionUtil.calculateParity(compressedMessage);

@@ -30,8 +30,10 @@ public class CompressionUtil {
         // Forcer la compression en ajoutant un préfixe spécial
         compressed.append("C");
         
+        // Traiter chaque caractère
         for (int i = 0; i < input.length(); i++) {
-            current.append(input.charAt(i));
+            char c = input.charAt(i);
+            current.append(c);
             String currentStr = current.toString();
             
             if (!dictionary.containsKey(currentStr)) {
@@ -40,6 +42,7 @@ public class CompressionUtil {
                 int prefixIndex = dictionary.get(prefix);
                 char nextChar = currentStr.charAt(currentStr.length() - 1);
                 
+                // Ajouter l'entrée compressée
                 compressed.append(prefixIndex).append(nextChar);
                 dictionary.put(currentStr, nextIndex++);
                 current = new StringBuilder();

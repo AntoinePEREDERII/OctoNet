@@ -42,7 +42,10 @@ public class Client {
             }
 
             // Décompresser le message
+            System.out.println("Message reçu (avec parité): " + message);
+            System.out.println("Message sans parité: " + messageWithoutParity);
             String decompressedMessage = CompressionUtil.decompressLZ78(messageWithoutParity);
+            System.out.println("Message décompressé: " + decompressedMessage);
             System.out.println("Message reçu de " + from + ": " + decompressedMessage);
         } catch (Exception e) {
             System.err.println("Erreur lors du traitement du message de " + from + ": " + e.getMessage());
@@ -58,17 +61,20 @@ public class Client {
 
         try {
             // Forcer la compression pour tous les messages
-            String compressedMessage = CompressionUtil.compressLZ78(message);
+            System.out.println("\n=== Envoi de message ===");
             System.out.println("Message original: " + message);
+            String compressedMessage = CompressionUtil.compressLZ78(message);
             System.out.println("Message compressé: " + compressedMessage);
             
             // Ajouter le bit de parité
             boolean parityBit = CompressionUtil.calculateParity(compressedMessage);
             String messageWithParity = compressedMessage + (parityBit ? "1" : "0");
+            System.out.println("Message avec parité: " + messageWithParity);
             
             // type_message=1 pour message, serveur_cible et serveur_source peuvent être null ou this.name si besoin
             Trame_message trame = new Trame_message(1, null, null, destClient, this.name, messageWithParity);
             sendTrame(trame);
+            System.out.println("=== Message envoyé ===\n");
         } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi du message: " + e.getMessage());
         }

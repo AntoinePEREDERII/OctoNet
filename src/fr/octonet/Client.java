@@ -59,6 +59,8 @@ public class Client {
         try {
             // Forcer la compression pour tous les messages
             String compressedMessage = CompressionUtil.compressLZ78(message);
+            System.out.println("Message original: " + message);
+            System.out.println("Message compressé: " + compressedMessage);
             
             // Ajouter le bit de parité
             boolean parityBit = CompressionUtil.calculateParity(compressedMessage);

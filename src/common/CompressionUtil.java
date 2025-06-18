@@ -27,6 +27,9 @@ public class CompressionUtil {
         StringBuilder current = new StringBuilder();
         int nextIndex = 1;
         
+        // Forcer la compression en ajoutant un préfixe spécial
+        compressed.append("C");
+        
         for (int i = 0; i < input.length(); i++) {
             current.append(input.charAt(i));
             String currentStr = current.toString();
@@ -37,8 +40,7 @@ public class CompressionUtil {
                 int prefixIndex = dictionary.get(prefix);
                 char nextChar = currentStr.charAt(currentStr.length() - 1);
                 
-                // Forcer la compression en ajoutant un préfixe spécial
-                compressed.append("C").append(prefixIndex).append(nextChar);
+                compressed.append(prefixIndex).append(nextChar);
                 dictionary.put(currentStr, nextIndex++);
                 current = new StringBuilder();
             }
@@ -47,7 +49,7 @@ public class CompressionUtil {
         // Gérer le dernier caractère si nécessaire
         if (current.length() > 0) {
             String currentStr = current.toString();
-            compressed.append("C").append(dictionary.get(currentStr));
+            compressed.append(dictionary.get(currentStr));
         }
         
         return compressed.toString();
@@ -66,13 +68,13 @@ public class CompressionUtil {
         int i = 0;
         
         try {
+            // Vérifier le préfixe de compression
+            if (compressed.charAt(i) != 'C') {
+                throw new IllegalArgumentException("Format de compression invalide: préfixe manquant");
+            }
+            i++;
+            
             while (i < compressed.length()) {
-                // Vérifier le préfixe de compression
-                if (compressed.charAt(i) != 'C') {
-                    throw new IllegalArgumentException("Format de compression invalide: préfixe manquant");
-                }
-                i++;
-                
                 // Lire l'index
                 StringBuilder indexStr = new StringBuilder();
                 while (i < compressed.length() && Character.isDigit(compressed.charAt(i))) {
